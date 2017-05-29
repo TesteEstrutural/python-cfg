@@ -82,7 +82,7 @@ class SimpleVisitor(ast.NodeVisitor):
         print len(self.nodeList), ".", type(node).__name__
 
         self.nodeList.append(node)
-        ast.NodeVisitor.generic_visit(self, node)  # chamando o próximo nó
+        ast.NodeVisitor.generic_visit(self, node)  # chamando a visita original
 
 
 dot = Digraph(comment='AST NODES')
