@@ -63,23 +63,18 @@ class SimpleVisitor(ast.NodeVisitor):
         # self.generic_visit(node.test)
         print "body: ", node.body
         for no in node.body:
-            self.visit(no)  # se chamar generic, fura as restrições
+            self.visit(no)
         print "orelse: ", node.orelse, "\n"
         for no in node.orelse:
-            self.generic_visit(no)
-
-        """Falta implementar uma maneira de navegar só pelos nós
-        dentro de cada um desses parâmetros e tratá-los de acordo."""
-
-        # chamando o próximo nó mesmo que esteja dentro do if (para teste)
-        # self.generic_visit(node)
+            self.generic_visit(no)  # se chamar generic, fura as restrições
+        # o foco está sendo aqui
 
     def generic_visit(self, node):
         """Classes cuja visita não tiver sido redefinida
         pelos métodos acima serão visitadas por esse método."""
 
         # o que ainda não foi pego pelas classes
-        print len(self.nodeList), ".", type(node).__name__
+        print len(self.nodeList), ".", type(node).__name__  # printa o tipo
 
         self.nodeList.append(node)
         ast.NodeVisitor.generic_visit(self, node)  # chamando a visita original
