@@ -3,6 +3,7 @@
 import inspect
 import ast
 from graphviz import Digraph
+import Grafo
 
 
 def foo(a):  # função a ser testada
