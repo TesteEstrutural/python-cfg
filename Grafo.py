@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import No
+from No import No
 
 
 class Grafo:
@@ -15,10 +15,11 @@ class Grafo:
 
     numNos = 0
     listaNos = []
-    listaSemFilhos = []
+    listaSemFilhos = []  # para usar como pais do nó seguinte ao orelse
     listaReturn = []
     pilhaIf = []
     anterior = None
+    campo = None  # define se está no body ou orelse de um if
 
     def __init__(self):
         pass
@@ -42,6 +43,9 @@ class Grafo:
             return False
         return True
 
+    def defCampo(self, campo):  # define se o próximo está em um body ou orelse
+        self.campo = campo
+
     def criaNo(self, tipo, numlinha):
         """
         Cria nó apenas se ele mudar o fluxo do programa, para que
@@ -59,4 +63,9 @@ class Grafo:
             if (tipo == "If"):
                 self.pilhaIf.append(no)
 
-            no.setPai()
+            # Quando for o primeiro elemento do orelse, define o pai dele
+            # como o if mais recente da pilha e desempilha esse if.
+            if (self.campo == "orelse"):
+                no.setPai(self.pilhaIf.pop())
+                self.defCampo(None)
+            no.setPai(self.anterior)

@@ -4,13 +4,16 @@
 
 class No(object):
     tipo = None
-    filhos = []
+    numLinha = None
     pais = []
     coberto = False
 
     def __init__(self, tipo, numLinha):
-        pass
+        self.tipo = tipo
+        self.numLinha = numLinha
 
-    def setPai(pai):
+    def setPai(self, pai):
         self.pais.append(pai)
 
+    def setCoberto(self):
+        self.coberto = True
