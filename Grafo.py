@@ -24,9 +24,6 @@ class Grafo:
     def __init__(self):
         pass
 
-    def criaAresta(self):
-        pass
-
     def verificador(self, tipo):
         """
         Verifica se o nó desvia o fluxo.
@@ -34,17 +31,41 @@ class Grafo:
         Por enquanto, o if que lida com isso de alterar o fluxo só
         verifica se o nó é do tipo If.
 
-        Retorna True caso desvie o fluxo
+        Retorna True caso desvie o fluxo.
         """
 
-        if (self.anterior is None):
+        if (self.anterior is None):  # se for o primeiro nó do grafo, o cria
             return True
         if (tipo is not "If" and self.anterior is not "If"):
             return False
         return True
 
-    def defCampo(self, campo):  # define se o próximo está em um body ou orelse
-        self.campo = campo
+    def defCampo(self, campo):  # define o contexto do próximo nó
+        self.campo = campo  # pode ser body, orelse, fimOrelse, etc.
+
+    def defPai(self, no):
+        """
+        Quando for o primeiro elemento do orelse, define o pai dele
+        como o if mais recente da pilha e desempilha esse if.
+
+        Quando for o primeiro elemento depois de um orelse, define
+        seus pais como sendo todos os nós sem filhos (que não são return).
+
+        Caso contrário, define o pai como sendo o nó anterior.
+        """
+        if (self.campo == "orelse"):
+            no.setPai(self.pilhaIf.pop())
+            self.defCampo(None)
+
+        elif (self.campo == "fimOrelse"):
+            lista = []
+
+            # esvazia a lista de nós sem filhos e coloca todos como pais do nó
+            while (len(self.listaSemFilhos) > 0):
+                lista.append(self.listaSemFilhos.pop())
+            no.setPai(lista)
+        else:
+            no.setPai(self.anterior)
 
     def criaNo(self, tipo, numlinha):
         """
@@ -55,17 +76,13 @@ class Grafo:
         """
 
         if (not self.verificador(tipo)):
-            pass  # se não altera fluxo, ignora o nó da ast e não cria no grafo
+            pass  # se não altera fluxo, ignora nó da ast e não cria no grafo
         else:
-            self.numNos += 1
             no = No(self, tipo, numlinha)
+            self.numNos += 1
             self.listaNos.append(no)
             if (tipo == "If"):
                 self.pilhaIf.append(no)
+            # Definir os outros tipos aqui.
 
-            # Quando for o primeiro elemento do orelse, define o pai dele
-            # como o if mais recente da pilha e desempilha esse if.
-            if (self.campo == "orelse"):
-                no.setPai(self.pilhaIf.pop())
-                self.defCampo(None)
-            no.setPai(self.anterior)
+            self.defPai(no)

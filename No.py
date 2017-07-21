@@ -12,8 +12,12 @@ class No(object):
         self.tipo = tipo
         self.numLinha = numLinha
 
-    def setPai(self, pai):
-        self.pais.append(pai)
+    def setPai(self, pais):
+        if (isinstance(pais, int)):
+            self.pais.append(pais)
+        elif (isinstance(pais, list)):
+            while (len(pais) > 0):
+                self.pais.append(pais.pop())
 
     def setCoberto(self):
         self.coberto = True
