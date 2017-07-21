@@ -83,6 +83,8 @@ class Grafo:
             self.listaNos.append(no)
             if (tipo == "If"):
                 self.pilhaIf.append(no)
+            if (tipo == "Return"):
+                self.listaReturn.append(no)
             # Definir os outros tipos aqui.
 
             self.defPai(no)
