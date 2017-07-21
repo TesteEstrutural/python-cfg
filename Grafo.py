@@ -65,11 +65,7 @@ class Grafo:
                 lista.append(self.listaSemFilhos.pop())
             no.setPai(lista)
         else:
-            print "definindo pai como ", self.anterior
             no.setPai(self.anterior)
-            print "pais: "
-            for n in no.getPais():
-                print n
 
     def criaNo(self, tipo, numlinha):
         """
