@@ -41,6 +41,8 @@ class Grafo:
         return True
 
     def defCampo(self, campo):  # define o contexto do próximo nó
+        if (campo == "orelse" and self.campo == "body"):
+            self.listaSemFilhos.append(self.anterior)
         self.campo = campo  # pode ser body, orelse, fimOrelse, etc.
 
     def defPai(self, no):
@@ -55,7 +57,6 @@ class Grafo:
         """
         if (self.campo == "orelse"):
             no.setPai(self.pilhaIf.pop())
-            self.defCampo(None)
 
         elif (self.campo == "fimOrelse"):
             lista = []
@@ -66,6 +67,7 @@ class Grafo:
             no.setPai(lista)
         else:
             no.setPai(self.anterior)
+        self.defCampo(None)
 
     def criaNo(self, tipo, numlinha):
         """
@@ -95,17 +97,36 @@ class Grafo:
         for no in self.listaNos:
             print no.getTipo(), " filho de: "
             for pai in no.getPais():
-                print pai
+                try:
+                    print pai.getTipo()
+                except (AttributeError):  # se não tiver pais
+                    print "Ninguém"
 
 
-"""
+""" TESTE 05
 grafo = Grafo()
 grafo.criaNo("assignment", 0)
 grafo.criaNo("If", 0)
-for n in range(1, 5):
-    grafo.criaNo("asd", n)
+grafo.defCampo("body")
+grafo.criaNo("assignment", 3)
+grafo.criaNo("assignment", 3)
+grafo.defCampo("orelse")
+grafo.criaNo("assignment", 3)
+grafo.criaNo("assignment", 3)
+grafo.defCampo("fimOrelse")
+grafo.criaNo("assignment", 3)
+grafo.criaNo("assignment", 3)
+
 grafo.criaNo("If", 5)
 print "printando grafo"
 grafo.printGrafo()
-print "anterior: ", grafo.anterior.getTipo()
+
+CONCLUSÔES:
+    -Lidar com a transição de campos
+        -adicionar na ListaSemFilhos sempre que mudar o contexto?
+        -lidar com assignments em campos diferentes
+    -Gerar .Dot com o graphviz
+    -mexer no ast_walker
+        -ignorar inúteis (ctx, name, etc.)
+        -passar o campo quando entrar (body, orelse, fimorelse, etc)
 """
