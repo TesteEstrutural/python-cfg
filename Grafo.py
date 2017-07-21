@@ -36,7 +36,7 @@ class Grafo:
 
         if (self.anterior is None):  # se for o primeiro nó do grafo, o cria
             return True
-        if (tipo is not "If" and self.anterior is not "If"):
+        if (tipo is not "If" and self.anterior.getTipo() is not "If"):
             return False
         return True
 
@@ -78,7 +78,7 @@ class Grafo:
         if (not self.verificador(tipo)):
             pass  # se não altera fluxo, ignora nó da ast e não cria no grafo
         else:
-            no = No(self, tipo, numlinha)
+            no = No(tipo, numlinha)
             self.numNos += 1
             self.listaNos.append(no)
             if (tipo == "If"):
@@ -88,3 +88,18 @@ class Grafo:
             # Definir os outros tipos aqui.
 
             self.defPai(no)
+            self.anterior = no  # nó recém incluido é anterior ao próximo
+
+    def printGrafo(self):
+    	for no in listaNos:
+    		print no.getTipo(), " Filho de: "
+    			for pai in no.getPais():
+    				print pai, ", "
+
+
+grafo = Grafo()
+for n in range(1,5):
+	print n
+	criaNo("If", n)
+
+printGrafo()

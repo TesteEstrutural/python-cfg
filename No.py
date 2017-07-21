@@ -21,3 +21,15 @@ class No(object):
 
     def setCoberto(self):
         self.coberto = True
+
+    def getTipo(self):
+        return self.tipo
+
+    def getNumLinha(self):
+        return self.numLinha
+
+    def getPais(self):
+        return self.pais
+
+    def getCoberto(self):
+        return self.coberto
