@@ -3,21 +3,19 @@
 
 
 class No(object):
-    tipo = None
-    numLinha = None
-    pais = []
-    coberto = False
 
     def __init__(self, tipo, numLinha):
         self.tipo = tipo
         self.numLinha = numLinha
+        self.pais = []
+        self.coberto = False
 
     def setPai(self, pais):
-        if (isinstance(pais, int)):
-            self.pais.append(pais)
-        elif (isinstance(pais, list)):
+        if (isinstance(pais, list)):
             while (len(pais) > 0):
                 self.pais.append(pais.pop())
+        else:
+            self.pais.append(pais)
 
     def setCoberto(self):
         self.coberto = True

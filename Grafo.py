@@ -65,7 +65,11 @@ class Grafo:
                 lista.append(self.listaSemFilhos.pop())
             no.setPai(lista)
         else:
+            print "definindo pai como ", self.anterior
             no.setPai(self.anterior)
+            print "pais: "
+            for n in no.getPais():
+                print n
 
     def criaNo(self, tipo, numlinha):
         """
@@ -79,6 +83,7 @@ class Grafo:
             pass  # se não altera fluxo, ignora nó da ast e não cria no grafo
         else:
             no = No(tipo, numlinha)
+            self.defPai(no)
             self.numNos += 1
             self.listaNos.append(no)
             if (tipo == "If"):
@@ -87,19 +92,24 @@ class Grafo:
                 self.listaReturn.append(no)
             # Definir os outros tipos aqui.
 
-            self.defPai(no)
             self.anterior = no  # nó recém incluido é anterior ao próximo
 
     def printGrafo(self):
-    	for no in listaNos:
-    		print no.getTipo(), " Filho de: "
-    			for pai in no.getPais():
-    				print pai, ", "
+        print "quantidade de nos:", self.numNos
+        for no in self.listaNos:
+            print no.getTipo(), " filho de: "
+            for pai in no.getPais():
+                print pai
 
 
+"""
 grafo = Grafo()
-for n in range(1,5):
-	print n
-	criaNo("If", n)
-
-printGrafo()
+grafo.criaNo("assignment", 0)
+grafo.criaNo("If", 0)
+for n in range(1, 5):
+    grafo.criaNo("asd", n)
+grafo.criaNo("If", 5)
+print "printando grafo"
+grafo.printGrafo()
+print "anterior: ", grafo.anterior.getTipo()
+"""
