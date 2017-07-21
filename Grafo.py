@@ -121,6 +121,8 @@ grafo.criaNo("If", 5)
 print "printando grafo"
 grafo.printGrafo()
 
+"""
+"""
 CONCLUSÔES:
     -Lidar com a transição de campos
         -adicionar na ListaSemFilhos sempre que mudar o contexto?
