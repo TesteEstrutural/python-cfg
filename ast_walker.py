@@ -37,10 +37,6 @@ class Ast_walker(ast.NodeVisitor):
         os nós correspondentes a esses campos ficam dentro deles
         '''
         self.grafo.criaNo("If", 0)
-        print "\nIF: BLOCOS:"
-        print "test: ", node.test
-        # self.generic_visit(node.test)
-        print "body: ", node.body
         grafo.defCampo("body")
         if (len(node.body) == 0):
             self.grafo.criaNo("bodyVazio", 0)
@@ -52,7 +48,7 @@ class Ast_walker(ast.NodeVisitor):
             self.grafo.criaNo("orelseVazio", 0)
         for no in node.orelse:
             self.visit(no)  # se chamar generic, fura as restrições
-        # o foco está sendo aqui
+
         grafo.defCampo("fimOrelse")
 
     def generic_visit(self, node):
