@@ -18,8 +18,10 @@ class Grafo:
     listaSemFilhos = []  # para usar como pais do nó seguinte ao orelse
     listaReturn = []
     pilhaIf = []
+    pilhaCampo = []  # guarda campos para restaurar (if dentro de if, etc)
     anterior = None
-    campo = None  # define se está no body ou orelse de um if
+    campo = None  # define se está no body ou orelse de um if, por exemplo
+    transicaoDeCampo = False
 
     def __init__(self):
         pass
@@ -33,6 +35,8 @@ class Grafo:
 
         Retorna True caso desvie o fluxo.
         """
+        if (self.transicaoDeCampo is True):
+            return True  # se tá mudando de campo numa estrutura de controle
 
         if (self.anterior is None):  # se for o primeiro nó do grafo, o cria
             return True
@@ -41,7 +45,9 @@ class Grafo:
         return True
 
     def defCampo(self, campo):  # define o contexto do próximo nó
-        if (campo == "orelse" and self.campo == "body"):
+        if (campo == "orelse" and self.campo == "body" or
+           campo == "fimOrelse" and self.campo == "orelse"):
+            self.transicaoDeCampo = True
             self.listaSemFilhos.append(self.anterior)
         self.campo = campo  # pode ser body, orelse, fimOrelse, etc.
 
@@ -55,19 +61,21 @@ class Grafo:
 
         Caso contrário, define o pai como sendo o nó anterior.
         """
-        if (self.campo == "orelse"):
-            no.setPai(self.pilhaIf.pop())
+        if (self.transicaoDeCampo is True):
+            self.transicaoDeCampo = False
+            if (self.campo == "orelse"):
+                no.setPai(self.pilhaIf.pop())
+                print "pais: ", no.getPais()
 
-        elif (self.campo == "fimOrelse"):
-            lista = []
+            elif (self.campo == "fimOrelse"):
+                lista = []
 
-            # esvazia a lista de nós sem filhos e coloca todos como pais do nó
-            while (len(self.listaSemFilhos) > 0):
-                lista.append(self.listaSemFilhos.pop())
-            no.setPai(lista)
+                # esvazia a lista de nós sem filhos e coloca como pais do nó
+                while (len(self.listaSemFilhos) > 0):
+                    lista.append(self.listaSemFilhos.pop())
+                no.setPai(lista)
         else:
             no.setPai(self.anterior)
-        self.defCampo(None)
 
     def criaNo(self, tipo, numlinha):
         """
@@ -102,8 +110,10 @@ class Grafo:
                 except (AttributeError):  # se não tiver pais
                     print "Ninguém"
 
+    def printCampo(self):
+        print "Campo: ", self.campo
 
-""" TESTE 05
+
 grafo = Grafo()
 grafo.criaNo("assignment", 0)
 grafo.criaNo("If", 0)
@@ -116,19 +126,6 @@ grafo.criaNo("assignment", 3)
 grafo.defCampo("fimOrelse")
 grafo.criaNo("assignment", 3)
 grafo.criaNo("assignment", 3)
-
 grafo.criaNo("If", 5)
 print "printando grafo"
 grafo.printGrafo()
-
-"""
-"""
-CONCLUSÔES:
-    -Lidar com a transição de campos
-        -adicionar na ListaSemFilhos sempre que mudar o contexto?
-        -lidar com assignments em campos diferentes
-    -Gerar .Dot com o graphviz
-    -mexer no ast_walker
-        -ignorar inúteis (ctx, name, etc.)
-        -passar o campo quando entrar (body, orelse, fimorelse, etc)
-"""
