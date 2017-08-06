@@ -121,10 +121,10 @@ class Grafo:
             for pai in no.getPais():
                 if (pai is not None):
                     dot.edge(str(pai), str(no))
-        print(dot.source)
         dot.render('grafo.gv', view=True)
 
 
+'''
 grafo = Grafo()
 grafo.criaNo("assignment", 0)
 grafo.criaNo("If", 0)
@@ -142,3 +142,4 @@ print "printando grafo"
 grafo.printGrafo()
 
 grafo.geraDot()
+'''
