@@ -37,7 +37,8 @@ class Grafo:
         """
         if (self.transicaoDeCampo is True):
             return True  # se tá mudando de campo numa estrutura de controle
-
+        if (tipo == "Module"):
+            return False
         if (self.anterior is None):  # se for o primeiro nó do grafo, o cria
             return True
         if (tipo is not "If" and self.anterior.getTipo() is not "If"):
@@ -65,7 +66,6 @@ class Grafo:
             self.transicaoDeCampo = False
             if (self.campo == "orelse"):
                 no.setPai(self.pilhaIf.pop())
-                print "pais: ", no.getPais()
 
             elif (self.campo == "fimOrelse"):
                 lista = []
@@ -103,7 +103,7 @@ class Grafo:
     def printGrafo(self):
         print "quantidade de nos:", self.numNos
         for no in self.listaNos:
-            print no.getTipo(), " filho de: "
+            print no.getTipo(), "numLinha: ", no.getNumLinha(), " filho de:"
             for pai in no.getPais():
                 try:
                     print pai.getTipo()
@@ -116,7 +116,7 @@ class Grafo:
     def geraDot(self):
         dot = Digraph(comment='CFG')
         for no in self.listaNos:
-            dot.node(str(no), no.getTipo())
+            dot.node(str(no), no.getTipoLinha())
         for no in self.listaNos:
             for pai in no.getPais():
                 if (pai is not None):

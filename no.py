@@ -31,3 +31,7 @@ class No(object):
 
     def getCoberto(self):
         return self.coberto
+
+    def getTipoLinha(self):
+        tipolinha = self.tipo + "\nL: " + str(self.numLinha)
+        return tipolinha
