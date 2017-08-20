@@ -18,10 +18,13 @@ class Grafo:
     listaSemFilhos = []  # para usar como pais do nó seguinte ao orelse
     listaReturn = []
     pilhaIf = []
+    pilhaFor = []
+    pilhaWhile = []
     pilhaCampo = []  # guarda campos para restaurar (if dentro de if, etc)
     anterior = None
     campo = None  # define se está no body ou orelse de um if, por exemplo
     transicaoDeCampo = False
+    tiposNo = ["If", "For", "While"]
 
     def __init__(self):
         pass
@@ -35,13 +38,14 @@ class Grafo:
 
         Retorna True caso desvie o fluxo.
         """
+        tiposNo = ["If", "For", "While"]
         if (self.transicaoDeCampo is True):
             return True  # se tá mudando de campo numa estrutura de controle
         if (tipo == "Module"):
             return False
         if (self.anterior is None):  # se for o primeiro nó do grafo, o cria
             return True
-        if (tipo is not "If" and self.anterior.getTipo() is not "If"):
+        if tipo not in tiposNo and self.anterior.getTipo()  not in tiposNo:
             return False
         return True
 
@@ -64,9 +68,10 @@ class Grafo:
         """
         if (self.transicaoDeCampo is True):
             self.transicaoDeCampo = False
-            if (self.campo == "orelse"):
+            if self.campo == "orelse" and self.pilhaIf:
                 no.setPai(self.pilhaIf.pop())
-
+            if self.campo == "orelse" and self.pilhaFor:
+                no.setPai(self.pilhaFor.pop())
             elif (self.campo == "fimOrelse"):
                 lista = []
 
@@ -97,8 +102,14 @@ class Grafo:
             if (tipo == "Return"):
                 self.listaReturn.append(no)
             # Definir os outros tipos aqui.
+            if (tipo == "For"):
+                self.pilhaFor.append(no)
+            if (tipo == "While"):
+                self.pilhaWhile.append(no)
 
-            self.anterior = no  # nó recém incluido é anterior ao próximo
+            self.anterior = no # nó recém incluido é anterior ao próximo
+
+            return self.anterior
 
     def printGrafo(self):
         print "quantidade de nos:", self.numNos
