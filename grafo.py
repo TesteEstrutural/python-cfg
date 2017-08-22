@@ -24,7 +24,7 @@ class Grafo:
     anterior = None
     campo = None  # define se está no body ou orelse de um if, por exemplo
     transicaoDeCampo = False
-    tiposNo = ["If", "For", "While"]
+
 
     def __init__(self):
         pass
@@ -45,7 +45,7 @@ class Grafo:
             return False
         if (self.anterior is None):  # se for o primeiro nó do grafo, o cria
             return True
-        if tipo not in tiposNo and self.anterior.getTipo()  not in tiposNo:
+        if tipo not in tiposNo and self.anterior.getTipo() not in tiposNo:
             return False
         return True
 
@@ -81,6 +81,32 @@ class Grafo:
                 no.setPai(lista)
         else:
             no.setPai(self.anterior)
+
+    def defPaiAlterado(self, no, node):
+        """
+        Quando for o primeiro elemento do orelse, define o pai dele
+        como o if mais recente da pilha e desempilha esse if.
+
+        Quando for o primeiro elemento depois de um orelse, define
+        seus pais como sendo todos os nós sem filhos (que não são return).
+
+        Caso contrário, define o pai como sendo o nó anterior.
+        """
+        if (self.transicaoDeCampo is True):
+            self.transicaoDeCampo = False
+            if self.campo == "orelse" and self.pilhaIf:
+                no.setPai(self.pilhaIf.pop())
+            if self.campo == "orelse" and self.pilhaFor:
+                no.setPai(self.pilhaFor.pop())
+            elif (self.campo == "fimOrelse"):
+                lista = []
+
+                # esvazia a lista de nós sem filhos e coloca como pais do nó
+                while (len(self.listaSemFilhos) > 0):
+                    lista.append(self.listaSemFilhos.pop())
+                no.setPai(lista)
+        else:
+            no.setPai(node)
 
     def criaNo(self, tipo, numlinha):
         """

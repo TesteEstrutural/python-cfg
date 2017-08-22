@@ -7,17 +7,13 @@ from grafo import Grafo
 
 def foo(a):  # função a ser testada
     b = 2 + a
-    for i in range(0, 5):
-        print b
     if (b > 2):
         print a
         print b
         if (a > b):
             print 3
-            if(a == 4):
-                while i in range(0,4):
-                    print "asd"
     for i in range(0, 5):
+        print "aaa"
         for o in range(0, 5):
             print b
     else:
@@ -29,21 +25,36 @@ def foo(a):  # função a ser testada
         b = 4
         pass
 def oi():
-    for x in range(0,1):
+    while True:
         print "vsffffff"
+        False
     pass
 
+def iai():
+    a = 98
+    if a <98:
+        print 'oi'
+        if a>98:
+            print 'mds'
 
 
-def ola():
-    i =9
-    if(i<3):
+def eae():
+    i=0
+    while i<4:
         print i
-    else:
-        print 'ooo'
-def o():
-    print 'oo'
-    pass
+        j=0
+        i+=1
+        while j<8:
+            print j
+            k=0
+            j += 1
+            for k in range(0, 8):
+                print k
+                k += 1
+                for k in range(0, 8):
+                    print k
+                    k += 1
+
 
 class Ast_walker(ast.NodeVisitor):
 
@@ -61,12 +72,12 @@ class Ast_walker(ast.NodeVisitor):
         '''
         self.grafo.criaNo("If", node.lineno)
         grafo.defCampo("body")
-        if (len(node.body) == 0):
+        if not node.body:
             self.grafo.criaNo("bodyVazio", node.lineno)
         for no in node.body:
             self.visit(no)
         grafo.defCampo("orelse")
-        if (len(node.orelse) == 0):
+        if not node.orelse:
             self.grafo.criaNo("orelseVazio", node.lineno)
         for no in node.orelse:
             self.visit(no)  # se chamar generic, fura as restrições
@@ -76,45 +87,55 @@ class Ast_walker(ast.NodeVisitor):
 
     def visit_For(self, node):
         novoNo = self.grafo.criaNo("For", node.lineno)
+        ultimoBody = None
         grafo.defCampo("body")
-        if (len(node.body) == 0):
+        #ultimoFor = grafo.pilhaFor
+
+        if not node.body:
             self.grafo.criaNo("bodyVazio", node.lineno)
         for no in node.body:
-            self.visit(no)
+            ultimoBody = self.visit(no)
+            novoNo.setPai(ultimoBody)
         grafo.defCampo("orelse")
-        if (len(node.orelse) == 0):
+        if not node.orelse:
             self.grafo.criaNo("orelseVazio", node.lineno)
-
         for no in node.orelse:
             self.visit(no)  # se chamar generic, fura as restrições
-        if grafo.anterior.getTipo() is "For":
-            novoNo.setPai(grafo.anterior)
-            grafo.pilhaFor.pop()
-            print "ioioio"
         grafo.defCampo("fimOrelse")
+        i=0
+        while grafo.pilhaFor and i < 1:
+            grafo.pilhaFor[-1].setPai(novoNo)
+            i=1
+        while grafo.pilhaWhile and i < 1:
+            grafo.pilhaWhile[-1].setPai(novoNo)
+            i=1
+
+
 
     def visit_While(self, node):
         novoNo = self.grafo.criaNo("While", node.lineno)
+        novoNo1 = None
         grafo.defCampo("body")
-        if (len(node.body) == 0):
+        if not node.body:
             self.grafo.criaNo("bodyVazio", node.lineno)
         for no in node.body:
-            self.visit(no)
-        grafo.defCampo("orelse")
-        if (len(node.orelse) == 0):
-            self.grafo.criaNo("orelseVazio", node.lineno)
-
-        for no in node.orelse:
-            self.visit(no)  # se chamar generic, fura as restrições
-        if grafo.anterior.getTipo() is "For":
-            novoNo.setPai(grafo.anterior)
-            grafo.pilhaFor.pop()
-            print "ioioio"
+            novoNo1 = self.visit(no)
+            novoNo.setPai(novoNo1)
         grafo.defCampo("fimOrelse")
+        i = 0
+        while grafo.pilhaWhile and i < 1:
+            grafo.pilhaWhile[-1].setPai(novoNo)
+            i = 1
 
-    def visit_Print(self, node):
+    '''def visit_Print(self, node):
         novoNo = self.grafo.criaNo("Print", node.lineno)
         grafo.defCampo("body")
+        if novoNo.pais:
+            for pais in novoNo.pais:
+                if(pais.getTipo() is "For" or "While"):
+                    pais.setPai(novoNo)
+'''
+
 
 
 
@@ -126,20 +147,21 @@ class Ast_walker(ast.NodeVisitor):
         pelos métodos acima serão visitadas por esse método.
         '''
         lineno = -1
+        novoNo = None
         # nem todo nó tem o atributo lineno, mas todos os úteis têm
         if hasattr(node, "lineno"):
             lineno = node.lineno
-        self.grafo.criaNo(type(node).__name__, lineno)
+        novoNo = self.grafo.criaNo(type(node).__name__, lineno)
         ast.NodeVisitor.generic_visit(self, node)
-
+        return novoNo
 
 grafo = Grafo()
 walker = Ast_walker(grafo)
-codeAst = ast.parse(inspect.getsource(foo))
+codeAst = ast.parse(inspect.getsource(eae))
 walker.visit(codeAst)
-#astOfSource = ast.parse(inspect.getsource(oi))
+astOfSource = ast.parse(inspect.getsource(eae))
 #astOfSource1 = ast.parse(inspect.getsource(o))
-#print ast.dump(astOfSource)
+print ast.dump(astOfSource)
 #print ast.dump(astOfSource1)
 grafo.printGrafo()
 grafo.geraDot()
