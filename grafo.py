@@ -72,6 +72,8 @@ class Grafo:
                 no.setPai(self.pilhaIf.pop())
             if self.campo == "orelse" and self.pilhaFor:
                 no.setPai(self.pilhaFor.pop())
+            if self.campo == "body" and self.pilhaWhile:
+                no.setPai(self.pilhaWhile.pop())
             elif (self.campo == "fimOrelse"):
                 lista = []
 
@@ -82,31 +84,6 @@ class Grafo:
         else:
             no.setPai(self.anterior)
 
-    def defPaiAlterado(self, no, node):
-        """
-        Quando for o primeiro elemento do orelse, define o pai dele
-        como o if mais recente da pilha e desempilha esse if.
-
-        Quando for o primeiro elemento depois de um orelse, define
-        seus pais como sendo todos os nós sem filhos (que não são return).
-
-        Caso contrário, define o pai como sendo o nó anterior.
-        """
-        if (self.transicaoDeCampo is True):
-            self.transicaoDeCampo = False
-            if self.campo == "orelse" and self.pilhaIf:
-                no.setPai(self.pilhaIf.pop())
-            if self.campo == "orelse" and self.pilhaFor:
-                no.setPai(self.pilhaFor.pop())
-            elif (self.campo == "fimOrelse"):
-                lista = []
-
-                # esvazia a lista de nós sem filhos e coloca como pais do nó
-                while (len(self.listaSemFilhos) > 0):
-                    lista.append(self.listaSemFilhos.pop())
-                no.setPai(lista)
-        else:
-            no.setPai(node)
 
     def criaNo(self, tipo, numlinha):
         """
@@ -153,6 +130,7 @@ class Grafo:
     def geraDot(self):
         dot = Digraph(comment='CFG')
         for no in self.listaNos:
+            #todo detalhar melhor os nós
             dot.node(str(no), no.getTipoLinha())
         for no in self.listaNos:
             for pai in no.getPais():
