@@ -70,10 +70,10 @@ class Grafo:
             self.transicaoDeCampo = False
             if self.campo == "orelse" and self.pilhaIf:
                 no.setPai(self.pilhaIf.pop())
-            if self.campo == "orelse" and self.pilhaFor:
-                no.setPai(self.pilhaFor.pop())
-            if self.campo == "body" and self.pilhaWhile:
-                no.setPai(self.pilhaWhile.pop())
+            #if self.campo == "orelse" and self.pilhaFor:
+                #no.setPai(self.pilhaFor.pop())
+            #if self.campo == "body" and self.pilhaWhile:
+                #no.setPai(self.pilhaWhile.pop())
             elif (self.campo == "fimOrelse"):
                 lista = []
 
