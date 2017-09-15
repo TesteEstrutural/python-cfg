@@ -160,6 +160,7 @@ class Ast_walker(ast.NodeVisitor):
     def visit_While(self, node):
         '''
         While funciona de maneira idêntica ao for 
+        também suportando else
         '''
         novoNo = self.grafo.criaNo("While", node.lineno)
         grafo.defCampo("body")
