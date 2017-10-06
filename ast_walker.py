@@ -13,6 +13,7 @@ def foo(a):  # função a ser testada
             print 'oi'
             if(a<b):
                 print 'wab'
+                return 0
         for k in range(0,4):
             print 'dub'
             for o in range(0,3):
@@ -46,20 +47,34 @@ def iai():
 
 
 
-def eae():
-    l = [3,4,5,6,5]
-    o = [['rrrr'],['ll'],['opp']]
-    if type(l) is list:
-        for i in l:
-            print i
-            for k in o:
-                if (k == 3):
-                    print 'll'
-                print k
-    print 'oi'
+def zap():
+    o = True
+    if o:
+        try:
+            a = 10 / 0
+        except ZeroDivisionError:
+            print("Oops, invalid.")
+        except BaseException:
+            while a in o:
+                print 121
+        except BaseException:
+            while a in o:
+                print 121
+        else:
+            # Exception didn't occur, we're good.
+            pass
+        finally:
+             return 0
+
+def i():
+    i = [1]
+    for j in i:
+        if True:
+            print 9
+            break
+    pass
 
 class Ast_walker(ast.NodeVisitor):
-
     def __init__(self, grafo):
         self.grafo = grafo
 
@@ -91,7 +106,7 @@ class Ast_walker(ast.NodeVisitor):
                 novoNos.append(self.visit(lastNode))
         grafo.defCampo("orelse")
         if not node.orelse:
-            lastNode = self.grafo.criaNo("orelseVazio", node.lineno)
+            lastNode = self.grafo.criaNo("orelseVazioIf", node.lineno)
             novoNos.append(lastNode)
         if node.orelse:
             #orelse pode ter tamanho maior que 1?
@@ -110,10 +125,111 @@ class Ast_walker(ast.NodeVisitor):
             else:
                 visitElse.setPai(novoNo)
         grafo.defCampo("fimOrelse")
-        print len(novoNos)
+        #print len(novoNos)
         #novoNos.append(novoNo)
         return novoNos
 
+    def visit_Pass(self, node):
+        '''
+        '''
+        novoNo = self.grafo.criaNo("Pass", node.lineno)
+        novoNo.temFilho = False
+        return novoNo
+
+    def visit_Continue(self, node):
+        '''
+        '''
+        novoNo = self.grafo.criaNo("Continue", node.lineno)
+        return novoNo
+
+    def visit_Break(self, node):
+        '''
+        '''
+        novoNo = self.grafo.criaNo("Break", node.lineno)
+        novoNo.temFilho = False
+        return novoNo
+    def visit_Return(self, node):
+        '''
+        '''
+        novoNo = self.grafo.criaNo("Return", node.lineno)
+        novoNo.temFilho = False
+        return novoNo
+    def visit_TryFinally(self, node):
+        '''
+        '''
+        #print dir(node)
+        #print dir(node.finalbody)
+        #print dir(node.body)
+        #print 'oi'
+        novoNo = self.grafo.criaNo("TryFinally", node.lineno)
+        if not node.body:
+             self.grafo.criaNo("bodyVazio", node.lineno)
+        if node.body:
+            for no in node.body:
+                self.visit(no)
+        if not node.body:
+             self.grafo.criaNo("bodyVazio", node.lineno)
+        if not node.finalbody:
+             self.grafo.criaNo("bodyVazio", node.lineno)
+        if node.finalbody:
+            for no in node.finalbody:
+                n = self.grafo.criaNo("Finally", node.lineno)
+                self.visit(no)
+                #print dir(n)
+                n.setPai(novoNo)
+        return novoNo
+
+    def visit_TryExcept(self, node):
+        '''
+        '''
+        print node.orelse
+        novoNo = self.grafo.criaNo("TryExcept", node.lineno)
+        novoNo1 = None
+        if not node.body:
+             self.grafo.criaNo("bodyVazio", node.lineno)
+        if node.body:
+            for no in node.body:
+                novoNo1 = self.visit(no)
+        if not node.handlers:
+            self.grafo.criaNo("handlerVazio", node.lineno)
+        if node.handlers:
+            for no in node.handlers:
+                n = self.visit(no)
+                if(novoNo1 not in n.pais):
+                    n.setPai(novoNo1)
+        if not node.orelse:
+            self.grafo.criaNo("orElseVazioTryExcept", node.lineno)
+        if node.orelse:
+            for no in node.orelse:
+                self.visit(no)
+        return novoNo
+
+    def visit_ExceptHandler(self, node):
+
+        '''
+        '''
+        novoNo = self.grafo.criaNo("Except", node.lineno)
+        novoNo1 = None
+        if node.body:
+            novoNo1 = node.body.pop()
+            for no in node.body:
+                self.visit(no)
+            novoNo1 = self.visit(novoNo1)
+
+        if not node.body:
+             self.grafo.criaNo("bodyVazio", node.lineno)
+        novoNo1.temFilho = False
+        return novoNo
+
+    '''def visit_TryFinally(self, node):
+
+        novoNo = self.grafo.criaNo("Finally", node.lineno)
+        if node.body:
+            for no in node.body:
+                self.visit(no)
+        if not node.body:
+            self.grafo.criaNo("bodyVazio", node.lineno)
+        return novoNo'''
     def visit_For(self, node):
         '''
         Visita do for: o último filho do body é pai do for atual, 
@@ -124,7 +240,6 @@ class Ast_walker(ast.NodeVisitor):
         novoNo1= None
         novoNo2 = None
         grafo.defCampo("body")
-        print dir(node)
         if not node.body:
             novoNo1 = self.grafo.criaNo("bodyVazio", node.lineno)
         else:
@@ -133,28 +248,44 @@ class Ast_walker(ast.NodeVisitor):
                 self.visit(no)
             novoNo1 = self.visit(lastNode)
         grafo.defCampo("orelse")
-        if not node.orelse:
-           novoNo2 = self.grafo.criaNo("orelseVazio", node.lineno)
-           novoNo2.setPai(novoNo)
+        '''Compensa criar orelse vazio sempre? Hummmmmmmm'''
         if node.orelse:
             novoNo2 = self.visit(node.orelse[0])
             for no in node.orelse:
                 self.visit(no)
-            if(type(novoNo2) is list):
-                novoNo2[-1].setPai(novoNo)
-            else:
-                novoNo2.setPai(novoNo)
+        if not node.orelse:
+           novoNo2 = self.grafo.criaNo("orelseVazioFor", node.lineno)
+           novoNo2.setPai(novoNo)
 
+
+        if (type(novoNo2) is list):
+            noSonNodes = ["Return", "Pass", "Break"]
+            print novoNo2[-1].getTipo()
+            #if (novoNo2[-1].getTipo() not in noSonNodes):
+                #novoNo2[-1].setPai(novoNo)
+
+
+        else:
+            # print novoNo2.getTipo()
+            
+            noSonNodes = ["Return", "Pass", "Break"]
+            if (novoNo2.getTipo() not in noSonNodes):
+                #novoNo2.setPai(novoNo)
+                print 'oioioi'
 
         grafo.defCampo("fimOrelse")
         if(type(novoNo1) is list):
             if(len(novoNo1) >= 3):
-
                 novoNo1.pop()
             for no in novoNo1:
-                novoNo.setPai(no)
+                noSonNodes = ["Return", "Pass", "Break"]
+                if no.getTipo() not in noSonNodes:
+                   novoNo.setPai(no)
+
         else:
-            novoNo.setPai(novoNo1)
+            noSonNodes = ["Return", "Pass", "Break"]
+            if novoNo.getTipo() not in noSonNodes:
+                novoNo.setPai(novoNo1)
         return novoNo
 
     def visit_While(self, node):
@@ -166,7 +297,6 @@ class Ast_walker(ast.NodeVisitor):
         grafo.defCampo("body")
         novoNo1 = None
         noElse = None
-        print dir(node)
         print node.orelse
         if not node.body:
             novoNo1 = self.grafo.criaNo("bodyVazio", node.lineno)
@@ -206,9 +336,9 @@ class Ast_walker(ast.NodeVisitor):
 
 grafo = Grafo()
 walker = Ast_walker(grafo)
-codeAst = ast.parse(inspect.getsource(iai))
+codeAst = ast.parse(inspect.getsource(zap))
 walker.visit(codeAst)
-astOfSource = ast.parse(inspect.getsource(iai))
+astOfSource = ast.parse(inspect.getsource(zap))
 #astOfSource1 = ast.parse(inspect.getsource(o))
 print ast.dump(astOfSource)
 #print ast.dump(astOfSource1)

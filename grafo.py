@@ -38,7 +38,7 @@ class Grafo:
 
         Retorna True caso desvie o fluxo.
         """
-        tiposNo = ["If", "For", "While"]
+        tiposNo = ["If", "For", "While", "Return", "Continue", "Break", "Pass", "Try", "Except", "Finally", "TryExcept"]
         if (self.transicaoDeCampo is True):
             return True  # se tá mudando de campo numa estrutura de controle
         if (tipo == "Module"):
@@ -53,7 +53,8 @@ class Grafo:
         if (campo == "orelse" and self.campo == "body" or
            campo == "fimOrelse" and self.campo == "orelse"):
             self.transicaoDeCampo = True
-            self.listaSemFilhos.append(self.anterior)
+            if(self.anterior.getTipo() is not "Return" or "Break" or "Pass"):
+                self.listaSemFilhos.append(self.anterior)
         self.campo = campo  # pode ser body, orelse, fimOrelse, etc.
 
     def defPai(self, no):
@@ -79,7 +80,10 @@ class Grafo:
 
                 # esvazia a lista de nós sem filhos e coloca como pais do nó
                 while (len(self.listaSemFilhos) > 0):
-                    lista.append(self.listaSemFilhos.pop())
+                    o = self.listaSemFilhos.pop()
+
+                    if o.temFilho:
+                        lista.append(o)
                 no.setPai(lista)
         else:
             no.setPai(self.anterior)
@@ -129,13 +133,18 @@ class Grafo:
 
     def geraDot(self):
         dot = Digraph(comment='CFG')
+
         for no in self.listaNos:
             #todo detalhar melhor os nós
             dot.node(str(no), no.getTipoLinha())
         for no in self.listaNos:
             for pai in no.getPais():
                 if (pai is not None):
-                    dot.edge(str(pai), str(no))
+                    if no.getTipo() is "Except":
+
+                        dot.edge(str(pai), str(no))
+                    else:
+                        dot.edge(str(pai), str(no))
         dot.render('grafo.gv', view=True)
 
 

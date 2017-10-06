@@ -9,7 +9,7 @@ class No(object):
         self.numLinha = numLinha
         self.pais = []
         self.coberto = False
-
+        self.temFilho = True
     def setPai(self, pais):
         if (isinstance(pais, list)):
             while (len(pais) > 0):
@@ -35,3 +35,4 @@ class No(object):
     def getTipoLinha(self):
         tipolinha = self.tipo + "\nL: " + str(self.numLinha)
         return tipolinha
+
