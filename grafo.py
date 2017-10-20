@@ -38,7 +38,7 @@ class Grafo:
 
         Retorna True caso desvie o fluxo.
         """
-        tiposNo = ["If", "For", "While", "Return", "Continue", "Break", "Pass", "Try", "Except", "Finally", "TryExcept"]
+        tiposNo = ["If", "For", "While", "Return", "Continue", "Break", "Pass", "Try", "Except", "Finally", "TryExcept","With"]
         if (self.transicaoDeCampo is True):
             return True  # se tá mudando de campo numa estrutura de controle
         if (tipo == "Module"):
@@ -53,7 +53,12 @@ class Grafo:
         if (campo == "orelse" and self.campo == "body" or
            campo == "fimOrelse" and self.campo == "orelse"):
             self.transicaoDeCampo = True
-            if(self.anterior.getTipo() is not "Return" or "Break" or "Pass"):
+            if(self.anterior.temFilho != False):
+                self.listaSemFilhos.append(self.anterior)
+        if (campo == "orelseFor" and self.campo == "bodyFor" or
+           campo == "fimOrelseFor" and self.campo == "orelseFor"):
+            self.transicaoDeCampo = True
+            if(self.anterior.temFilho != False):
                 self.listaSemFilhos.append(self.anterior)
         self.campo = campo  # pode ser body, orelse, fimOrelse, etc.
 
@@ -77,14 +82,16 @@ class Grafo:
                 #no.setPai(self.pilhaWhile.pop())
             elif (self.campo == "fimOrelse"):
                 lista = []
-
+            elif (self.campo == "fimOrelseFor"):
+                lista = []
                 # esvazia a lista de nós sem filhos e coloca como pais do nó
                 while (len(self.listaSemFilhos) > 0):
                     o = self.listaSemFilhos.pop()
-
-                    if o.temFilho:
+                    if o.temFilho == True:
                         lista.append(o)
-                no.setPai(lista)
+                    print lista
+                    no.setPai(lista)
+
         else:
             no.setPai(self.anterior)
 
