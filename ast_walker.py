@@ -10,28 +10,6 @@ from grafo import Grafo
         print 1
     else:
         print '0'''
-def foo(a):  # função a ser testada
-    a = 3
-    b = 4
-    if(a<b):
-        for i in range(0,5):
-            b+=4
-            print 'oi'
-            if(a<b):
-                print 'wab'
-                pass
-        else:
-            print 'oias'
-        for k in range(0,4):
-            print 'dub'
-            for o in range(0,3):
-                a = 4
-                c = True
-                if (a < b):
-                    a = b
-            return 0
-    else:
-        print 'wauhwuahw'
 
 
 class Ast_walker(ast.NodeVisitor):
@@ -39,7 +17,8 @@ class Ast_walker(ast.NodeVisitor):
         self.grafo = grafo
 
     def visit_Module(self, node):
-        # asts sempre iniciam com módulo, coloquei ele chamando o resto
+        # asts sempre iniciam com módulo,
+        #  coloquei ele chamando o resto
         self.generic_visit(node)
 
     def visit_If(self, node):
@@ -51,19 +30,24 @@ class Ast_walker(ast.NodeVisitor):
         novoNos = []
         novoNo = self.grafo.criaNo("If", node.lineno)
         grafo.defCampo("body")
+        lastNode = None
         if not node.body:
             n = self.grafo.criaNo("bodyVazio", node.lineno)
             novoNos.append(n)
-        lastNode = None
         if node.body:
             if len(node.body) > 1:
                 lastNode = node.body.pop()
                 for no in node.body:
                     self.visit(no)
-                novoNos.append(self.visit(lastNode))
+                lastNode = self.visit(lastNode)
+                if(type(lastNode) is list):
+                    novoNos = lastNode
             else:
-                lastNode = node.body.pop()
-                novoNos.append(self.visit(lastNode))
+                o = self.visit(node.body.pop())
+                if (type(lastNode) is list):
+                    novoNos = o
+                else:
+                    novoNos.append(o)
         grafo.defCampo("orelse")
         if not node.orelse:
             lastNode = self.grafo.criaNo("orelseVazioIf", node.lineno)
@@ -72,7 +56,11 @@ class Ast_walker(ast.NodeVisitor):
             #orelse pode ter tamanho maior que 1?
             for no in node.orelse:
                novoNo2 = self.visit(no)
-
+            if type(novoNo2) is list:
+                while novoNo2:
+                    novoNos.append(novoNo2.pop(0))
+            else:
+                novoNos.append(novoNo2)
         grafo.defCampo("fimOrelse")
         #print len(novoNos)
         #novoNos.append(novoNo)
@@ -165,15 +153,7 @@ class Ast_walker(ast.NodeVisitor):
         novoNo1.temFilho = False
         return novoNo
 
-    '''def visit_TryFinally(self, node):
 
-        novoNo = self.grafo.criaNo("Finally", node.lineno)
-        if node.body:
-            for no in node.body:
-                self.visit(no)
-        if not node.body:
-            self.grafo.criaNo("bodyVazio", node.lineno)
-        return novoNo'''
     def visit_For(self, node):
         '''
         Visita do for: o último filho do body é pai do for atual, 
@@ -183,31 +163,35 @@ class Ast_walker(ast.NodeVisitor):
         novoNo = self.grafo.criaNo("For", node.lineno)
         novoNo1= None
         novoNo2 = None
+        iscontinue = False
         grafo.defCampo("bodyFor")
         if not node.body:
             novoNo1 = self.grafo.criaNo("bodyVazio", node.lineno)
-        else:
+        if node.body:
             lastNode = node.body.pop()
             for no in node.body:
-                self.visit(no)
+                i = self.visit(no)
+                if hasattr(i, 'getTipo'):
+                        if i.getTipo() == "Continue":
+                            novoNo.setPai(i)
+                            iscontinue = True
             novoNo1 = self.visit(lastNode)
         grafo.defCampo("orelseFor")
-        '''Compensa criar orelse vazio sempre? Hummmmmmmm'''
         if node.orelse:
             for no in node.orelse:
                 novoNo2 = self.visit(no)
-            novoNo2.setPai(novoNo)
+            if type(novoNo2) is list:
+                novoNo2[-1].setPai(novoNo)
+            else:
+                novoNo2.setPai(novoNo)
         if not node.orelse:
            novoNo2 = self.grafo.criaNo("orelseVazioFor", node.lineno)
            novoNo2.setPai(novoNo)
-
-
         if (type(novoNo2) is list):
             noSonNodes = ["Return", "Pass", "Break"]
             print novoNo2[-1].getTipo()
             #if (novoNo2[-1].getTipo() not in noSonNodes):
                 #novoNo2[-1].setPai(novoNo)
-
 
         else:
             # print novoNo2.getTipo()
@@ -218,18 +202,19 @@ class Ast_walker(ast.NodeVisitor):
 
         grafo.defCampo("fimOrelseFor")
         if(type(novoNo1) is list):
-            if(len(novoNo1) >= 3):
-                novoNo1.pop()
-            for no in novoNo1:
-                noSonNodes = ["Return", "Pass", "Break"]
-                if no.getTipo() not in noSonNodes:
-                   novoNo.setPai(no)
-
+            if(len(novoNo1) >= 2):
+                print novoNo1
+                for no in novoNo1:
+                    noSonNodes = ["Return", "Pass", "Break"]
+                    print no.getTipo()
+                    if no.getTipo() not in noSonNodes and iscontinue is False:
+                        print 'k'
+                        novoNo.setPai(no)
         else:
             noSonNodes = ["Return", "Pass", "Break"]
-            if novoNo.getTipo() not in noSonNodes:
+            if novoNo.getTipo() not in noSonNodes and iscontinue == False:
+                print 'j'
                 novoNo.setPai(novoNo1)
-
         return novoNo
 
     def visit_While(self, node):
@@ -296,6 +281,33 @@ class Ast_walker(ast.NodeVisitor):
         novoNo = self.grafo.criaNo(type(node).__name__, lineno)
         ast.NodeVisitor.generic_visit(self, node)
         return novoNo
+def foo(a):  # função a ser testada
+    a = 3
+    b = 4
+    if(a<b):
+        for i in range(0,5):
+            b+=4
+            print 'oi'
+            continue
+            for k in range(0,4):
+                print 'dub'
+                for o in range(0,3):
+                    a = 4
+                    c = True
+                    if (a < b):
+                        a = b
+                        if (a < b):
+                            a = b
+                            if (a < b):
+                                a = b
+                            else:
+                                a = b
+                        elif(x>1):
+                            a = b
+                            if (a < b):
+                                a = b
+        else:
+            print 'wauhwuahw'
 
 grafo = Grafo()
 walker = Ast_walker(grafo)
