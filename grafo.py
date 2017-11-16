@@ -32,13 +32,11 @@ class Grafo:
     def verificador(self, tipo):
         """
         Verifica se o nó desvia o fluxo.
-
         Por enquanto, o if que lida com isso de alterar o fluxo só
         verifica se o nó é do tipo If.
+        Retorna True caso desvie o fluxo."""
 
-        Retorna True caso desvie o fluxo.
-        """
-        tiposNo = ["If", "For", "While", "Return", "Continue", "Break", "Pass", "Try", "Except", "Finally", "TryExcept","With"]
+        tiposNo = ["If", "For", "While", "Return", "Continue","Break", "Pass", "Try", "Except", "Finally", "TryExcept","With"]
         if (self.transicaoDeCampo is True):
             return True  # se tá mudando de campo numa estrutura de controle
         if (tipo == "Module"):
@@ -53,14 +51,15 @@ class Grafo:
         if (campo == "orelse" and self.campo == "body" or
            campo == "fimOrelse" and self.campo == "orelse"):
             self.transicaoDeCampo = True
-            if(self.anterior.temFilho != False):
+            if((self.anterior).temFilho == True):
                 self.listaSemFilhos.append(self.anterior)
         if (campo == "orelseFor" and self.campo == "bodyFor" or
            campo == "fimOrelseFor" and self.campo == "orelseFor"):
             self.transicaoDeCampo = True
-            if(self.anterior.temFilho != False):
+            if((self.anterior).temFilho == True):
                 self.listaSemFilhos.append(self.anterior)
         self.campo = campo  # pode ser body, orelse, fimOrelse, etc.
+
 
     def defPai(self, no):
         """
@@ -76,25 +75,17 @@ class Grafo:
             self.transicaoDeCampo = False
             if self.campo == "orelse" and self.pilhaIf:
                 no.setPai(self.pilhaIf.pop())
-            #if self.campo == "orelse" and self.pilhaFor:
-                #no.setPai(self.pilhaFor.pop())
-            #if self.campo == "body" and self.pilhaWhile:
-                #no.setPai(self.pilhaWhile.pop())
-            elif (self.campo == "fimOrelse"):
-                lista = []
-            elif (self.campo == "fimOrelseFor"):
+            if (self.campo == "fimOrelse" or self.campo ==  "fimOrelseFor" or self.campo ==  "fimOrelseWhile"):
                 lista = []
                 # esvazia a lista de nós sem filhos e coloca como pais do nó
                 while (len(self.listaSemFilhos) > 0):
                     o = self.listaSemFilhos.pop()
-                    if o.temFilho == True:
+                    if o.temFilho == True :
                         lista.append(o)
-                    print lista
                     no.setPai(lista)
 
         else:
             no.setPai(self.anterior)
-
 
     def criaNo(self, tipo, numlinha):
         """
@@ -122,13 +113,12 @@ class Grafo:
                 self.pilhaWhile.append(no)
 
             self.anterior = no # nó recém incluido é anterior ao próximo
-
             return self.anterior
 
     def printGrafo(self):
-        print "quantidade de nos:", self.numNos
+        #print "quantidade de nos: ", self.numNos
         for no in self.listaNos:
-            print no.getTipo(), "numLinha: ", no.getNumLinha(), " filho de:"
+            #print no.getTipo(), "numLinha: ", no.getNumLinha(), " filho de:"
             for pai in no.getPais():
                 try:
                     print pai.getTipo()
@@ -140,18 +130,32 @@ class Grafo:
 
     def geraDot(self):
         dot = Digraph(comment='CFG')
-
+        #assigns = {'getNo': None, 'getTipo':'Assign', 'getLinha':''}
+        #assignsList = []
+        #lastAssign = None
         for no in self.listaNos:
             #todo detalhar melhor os nós
-            dot.node(str(no), no.getTipoLinha())
+            '''if no.getTipo() =='Assign':
+                assigns['getLinha'] +=str(no.getNumLinha())+' '
+                assigns['getNo'] = no
+                assignsList.append(no)
+                continue
+            else:
+                if assigns['getNo'] != None:
+                    dot.node(str(assigns['getNo']), assigns['getTipo']+'\nL: '+assigns['getLinha'])
+                assigns['getNo'] = None
+                assigns['getLinha'] = ''
+                if assignsList:
+                    lastAssign = assignsList.pop()'''
+            dot.node(str(no), no.getTipoLinha(), color='green')
         for no in self.listaNos:
-            for pai in no.getPais():
-                if (pai is not None):
-                    if no.getTipo() is "Except":
-
-                        dot.edge(str(pai), str(no))
-                    else:
-                        dot.edge(str(pai), str(no))
+            if no.getPais():
+                for pai in no.getPais():
+                    if (pai is not None):
+                        if no.getTipo() == "Except":
+                            dot.edge(str(pai), str(no), style ='dashed')
+                        else:
+                            dot.edge(str(pai), str(no))
         dot.render('grafo.gv', view=True)
 
 
