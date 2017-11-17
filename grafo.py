@@ -128,7 +128,7 @@ class Grafo:
     def printCampo(self):
         print "Campo: ", self.campo
 
-    def geraDot(self):
+    def geraDot(self, listCoverage):
         dot = Digraph(comment='CFG')
         #assigns = {'getNo': None, 'getTipo':'Assign', 'getLinha':''}
         #assignsList = []
@@ -147,12 +147,18 @@ class Grafo:
                 assigns['getLinha'] = ''
                 if assignsList:
                     lastAssign = assignsList.pop()'''
-            dot.node(str(no), no.getTipoLinha(), color='green')
+            if no.getNumLinha() in listCoverage:
+                dot.node(str(no), no.getTipoLinha(), color='green')
+            dot.node(str(no), no.getTipoLinha())
         for no in self.listaNos:
             if no.getPais():
                 for pai in no.getPais():
                     if (pai is not None):
-                        if no.getTipo() == "Except":
+                        if no.getNumLinha() in listCoverage and pai.getNumLinha() in listCoverage and no.getTipo() == "Except":
+                            dot.edge(str(pai), str(no), style='dashed', color='green')
+                        elif no.getNumLinha() in listCoverage and pai.getNumLinha() in listCoverage:
+                            dot.edge(str(pai), str(no), color='green')
+                        elif no.getTipo() == "Except":
                             dot.edge(str(pai), str(no), style ='dashed')
                         else:
                             dot.edge(str(pai), str(no))

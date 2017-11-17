@@ -206,7 +206,8 @@ class Ast_walker(ast.NodeVisitor):
         if not node.orelse:
            novoNo2 = self.grafo.criaNo("orelseVazioFor", node.lineno)
            print type(novoNo2)
-           novoNo2.setPai(novoNo)
+           if hasattr(novoNo2, 'setPai'):
+               novoNo2.setPai(novoNo)
         grafo.defCampo("fimOrelseFor")
         return novoNo
 
@@ -286,29 +287,33 @@ def shortBubbleSort(alist):
     passnum = len(alist)-1
     while passnum > 0 and exchanges:
        exchanges = False
-       i = 0
        for i in range(passnum):
-           if alist[i]>alist[i+1]:
+           if alist[i] > alist[i+1]:
                exchanges = True
                temp = alist[i]
                alist[i] = alist[i+1]
-               for temp in alist:
-                   print(1)
                alist[i+1] = temp
-           print (0)
        passnum = passnum-1
+    return alist
+
+def getCoverage(pythonFile):
+    import os
+    os.system('coverage run ' + pythonFile + ' && coverage report -m')
+    dictResultFile = ast.literal_eval(str(open(".coverage", "r").read()).replace('!coverage.py: This is a private format, don\'t read it directly!', ''))
+    return dictResultFile['lines'].values()[0]
 
 
 grafo = Grafo()
 walker = Ast_walker(grafo)
 codeAst = ast.parse(inspect.getsource(shortBubbleSort))
+listCoverage = getCoverage('foo2.py')
 #print inspect.getsource(shortBubbleSort)
 walker.visit(codeAst)
 astOfSource = ast.parse(inspect.getsource(shortBubbleSort))
 #astOfSource1 = ast.parse(inspect.getsource(o))
 #print (ast.dump(astOfSource))
 #print ast.dump(astOfSource1)
-#   grafo.printGrafo()
-grafo.geraDot()
+#grafo.printGrafo()
+grafo.geraDot(listCoverage)
 
 
