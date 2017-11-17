@@ -12,4 +12,4 @@ def shortBubbleSort(alist):
        passnum = passnum-1
     return alist
 if __name__ == "__main__":
-    print (shortBubbleSort([4,5,6,2,1,4,0,10,9]))
+    print (shortBubbleSort([4, 5]))

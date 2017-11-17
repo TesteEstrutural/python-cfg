@@ -298,7 +298,7 @@ def shortBubbleSort(alist):
 
 def getCoverage(pythonFile):
     import os
-    os.system('coverage run ' + pythonFile + ' && coverage report -m')
+    os.system('coverage run ' + pythonFile + '')
     dictResultFile = ast.literal_eval(str(open(".coverage", "r").read()).replace('!coverage.py: This is a private format, don\'t read it directly!', ''))
     return dictResultFile['lines'].values()[0]
 
