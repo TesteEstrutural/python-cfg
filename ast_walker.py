@@ -200,9 +200,14 @@ class Ast_walker(ast.NodeVisitor):
                 novoNo.setPai(novoNo1)
 
         grafo.defCampo("orelseFor")
+        novoNo2 = None
         if node.orelse:
-            for no in node.orelse:
-                self.visit(no)
+            novoNo2 = node.orelse.pop(-1)
+            if node.orelse:
+                for no in node.orelse:
+                    self.visit(no)
+            novoNo2 = self.visit(novoNo2)
+            novoNo2.setPai(novoNo)
         if not node.orelse:
            novoNo2 = self.grafo.criaNo("orelseVazioFor", node.lineno)
            print type(novoNo2)
@@ -217,30 +222,52 @@ class Ast_walker(ast.NodeVisitor):
         também suportando else
         '''
         novoNo = self.grafo.criaNo("While", node.lineno)
-        grafo.defCampo("bodyWhile")
         novoNo1 = None
-        noElse = None
+        iscontinue = False
+        grafo.defCampo("bodyFor")
         if not node.body:
-            novoNo1 = self.grafo.criaNo("bodyVazioWhile", node.lineno)
+            novoNo1 = self.grafo.criaNo("bodyVazio", node.lineno)
         if node.body:
-            for no in node.body:
-                novoNo1 = self.visit(no)
-        grafo.defCampo("orelseWhile")
-        if node.orelse:
-            for no in node.orelse:
-                novoNo2 = self.visit(no)
-            if(type(novoNo2) is list):
-                for n in novoNo2:
+            lastNode = node.body.pop()
+            if node.body:
+                for no in node.body:
+                    i = self.visit(no)
+                    if type(i) is list:
+                        for n in i:
+                            if hasattr(n, 'getTipo'):
+                                if n.getTipo() == "Continue":
+                                    novoNo.setPai(n)
+                    elif i.getTipo() == "Continue":
+                        novoNo.setPai(i)
+                        iscontinue = True
+            novoNo1 = self.visit(lastNode)
+            if type(novoNo1) is list:
+                for n in novoNo1:
+                    print
+                    n
                     novoNo.setPai(n)
             else:
+                print
+                novoNo1
+                novoNo.setPai(novoNo1)
+
+        grafo.defCampo("orelseFor")
+        novoNo2 = None
+        if node.orelse:
+            novoNo2 = node.orelse.pop(-1)
+            if node.orelse:
+                for no in node.orelse:
+                    self.visit(no)
+            novoNo2 = self.visit(novoNo2)
+            novoNo2.setPai(novoNo)
+        if not node.orelse:
+            novoNo2 = self.grafo.criaNo("orelseVazioFor", node.lineno)
+            print type(novoNo2)
+            if hasattr(novoNo2, 'setPai'):
                 novoNo2.setPai(novoNo)
         grafo.defCampo("fimOrelseFor")
-        if type(novoNo1) is list:
-            for no in novoNo1:
-                novoNo.setPai(no)
-        else:
-            novoNo.setPai(novoNo1)
         return novoNo
+
     def visit_With(self, node):
         '''
         '''
@@ -295,14 +322,43 @@ def shortBubbleSort(alist):
                alist[i+1] = temp
        passnum = passnum-1
     return alist
+def oi(a):
+    with a as f:
+        f.readLine()
+    return a
 
 def getCoverage(pythonFile):
     import os
-    os.system('coverage run ' + pythonFile + '')
+    os.system('coverage annotate ' + pythonFile + '')
+    os.system('coverage run ' + pythonFile +'')
+    codeAnnotation = []
+    with open(pythonFile+',cover','r') as f:
+        codeAnnotation = f.readlines()
+    codeAnnotation = [(x[1:].strip()).replace('\n', '') for x in codeAnnotation]
+    print(codeAnnotation)
     dictResultFile = ast.literal_eval(str(open(".coverage", "r").read()).replace('!coverage.py: This is a private format, don\'t read it directly!', ''))
-    return dictResultFile['lines'].values()[0]
-
-
+    os.system('coverage erase ' + pythonFile +'')
+    return [dictResultFile['lines'].values()[0], codeAnnotation]
+'''def oi(a):
+    b = 3
+    if(a<=b):
+        print 'condicao satisfeita'
+    else:
+        print 'opa, mude o valor de \'a\''
+    return a'''
+def shortBubbleSort(alist):
+    exchanges = True
+    passnum = len(alist)-1
+    while passnum > 0 and exchanges:
+       exchanges = False
+       for i in range(passnum):
+           if alist[i]>alist[i+1]:
+               exchanges = True
+               temp = alist[i]
+               alist[i] = alist[i+1]
+               alist[i+1] = temp
+       passnum = passnum-1
+    return alist
 grafo = Grafo()
 walker = Ast_walker(grafo)
 codeAst = ast.parse(inspect.getsource(shortBubbleSort))
@@ -314,6 +370,6 @@ astOfSource = ast.parse(inspect.getsource(shortBubbleSort))
 #print (ast.dump(astOfSource))
 #print ast.dump(astOfSource1)
 #grafo.printGrafo()
-grafo.geraDot(listCoverage)
+grafo.geraDot(listCoverage[0], listCoverage[1])
 
 

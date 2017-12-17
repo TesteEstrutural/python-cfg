@@ -4,7 +4,7 @@ def shortBubbleSort(alist):
     while passnum > 0 and exchanges:
        exchanges = False
        for i in range(passnum):
-           if alist[i] > alist[i+1]:
+           if alist[i]>alist[i+1]:
                exchanges = True
                temp = alist[i]
                alist[i] = alist[i+1]
@@ -12,4 +12,4 @@ def shortBubbleSort(alist):
        passnum = passnum-1
     return alist
 if __name__ == "__main__":
-    print (shortBubbleSort([4, 5]))
+    print (shortBubbleSort([1,7,9,32]))
