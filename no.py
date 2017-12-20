@@ -10,6 +10,8 @@ class No(object):
         self.pais = []
         self.coberto = False
         self.temFilho = True
+        self.sign = 0
+        self.filho = []
     def setPai(self, pais):
         if (isinstance(pais, list)):
             while (len(pais) > 0):
@@ -35,3 +37,13 @@ class No(object):
     def getTipoLinha(self):
         return self.tipo + "\nL: " + str(self.numLinha)
 
+    def setSign(self, sign, no):
+        self.sign = sign
+        self.filho.append(no)
+    def setSign(self, sign):
+        self.sign = sign
+    def getSign(self):
+        return self.sign
+
+    def getFilhos(self):
+        return self.filho

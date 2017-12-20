@@ -24,7 +24,7 @@ class Grafo:
     anterior = None
     campo = None  # define se está no body ou orelse de um if, por exemplo
     transicaoDeCampo = False
-
+    tiposNo = ["If", "For", "While", "Return", "Continue", "Break", "Pass", "Try", "Except", "Finally", "TryExcept", "With"]
 
     def __init__(self):
         pass
@@ -36,14 +36,13 @@ class Grafo:
         verifica se o nó é do tipo If.
         Retorna True caso desvie o fluxo."""
 
-        tiposNo = ["If", "For", "While", "Return", "Continue","Break", "Pass", "Try", "Except", "Finally", "TryExcept","With"]
         if (self.transicaoDeCampo is True):
             return True  # se tá mudando de campo numa estrutura de controle
         if (tipo == "Module"):
             return False
         if (self.anterior is None):  # se for o primeiro nó do grafo, o cria
             return True
-        if tipo not in tiposNo and self.anterior.getTipo() not in tiposNo:
+        if tipo not in self.tiposNo and self.anterior.getTipo() not in self.tiposNo:
             return False
         return True
 
@@ -59,7 +58,7 @@ class Grafo:
             if((self.anterior).temFilho == True):
                 self.listaSemFilhos.append(self.anterior)
         self.campo = campo  # pode ser body, orelse, fimOrelse, etc.
-
+        self.pilhaCampo.append(campo)
 
     def defPai(self, no):
         """
@@ -77,6 +76,11 @@ class Grafo:
                 no.setPai(self.pilhaIf.pop())
             if (self.campo == "fimOrelse" or self.campo ==  "fimOrelseFor" or self.campo ==  "fimOrelseWhile"):
                 lista = []
+                for i in range(0,2):
+                    self.pilhaCampo.pop()
+
+                self.campo = self.pilhaCampo[-1]
+
                 # esvazia a lista de nós sem filhos e coloca como pais do nó
                 while (len(self.listaSemFilhos) > 0):
                     o = self.listaSemFilhos.pop()
@@ -86,6 +90,8 @@ class Grafo:
 
         else:
             no.setPai(self.anterior)
+    def getTipos(self):
+        return self.tiposNo
 
     def criaNo(self, tipo, numlinha):
         """
@@ -149,22 +155,37 @@ class Grafo:
                     lastAssign = assignsList.pop()'''
             if no.getNumLinha() in listCoverage:
                 dot.node(str(no), no.getTipoLinha(), color='green')
-            dot.node(str(no), no.getTipoLinha()+'\n'+listSource[no.getNumLinha()-1])
+            if listSource:
+                dot.node(str(no), no.getTipoLinha()+'\n'+listSource[no.getNumLinha() - 1])
+            else:
+                dot.node(str(no), no.getTipoLinha() + '\n')
         for no in self.listaNos:
             if no.getPais():
-                for pai in no.getPais():
+                pais = list(set(no.getPais()))
+                p = len(pais) - 1
+                filter(lambda p : hasattr(p, 'getTipo') and (p.getTipo() == "Continue" or p.getTipo() == "Return" or p.getTipo() == "Pass" or p.getTipo() == "Break") and no.getTipo() != "Finally", pais)
+
+
+                p = len(pais) - 1
+                if no.getTipo() == "Except":
+                    for i in range(0, p):
+                        if pais[i].getSign() == 1:
+                            pais.pop(i)
+                for pai in pais:
                     if (pai is not None):
                         if no.getNumLinha() in listCoverage and pai.getNumLinha() in listCoverage and no.getTipo() == "Except":
                             dot.edge(str(pai), str(no), style='dashed', color='green')
-                        elif no.getNumLinha() in listCoverage and pai.getNumLinha() in listCoverage:
+                            continue
+                        if no.getNumLinha() in listCoverage and pai.getNumLinha() in listCoverage:
                             dot.edge(str(pai), str(no), color='green')
-                        elif no.getTipo() == "Except":
+                            continue
+                        if no.getTipo() == "Except" and no.getSign !=1:
                             dot.edge(str(pai), str(no), style ='dashed')
+                            continue
+
                         else:
                             dot.edge(str(pai), str(no))
         dot.render('grafo.gv', view=True)
-
-
 '''
 grafo = Grafo()
 grafo.criaNo("assignment", 0)
