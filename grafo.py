@@ -25,8 +25,15 @@ class Grafo:
     campo = None  # define se está no body ou orelse de um if, por exemplo
     transicaoDeCampo = False
     tiposNo = ["If", "For", "While", "Return", "Continue", "Break", "Pass", "Try", "Except", "Finally", "TryExcept", "With"]
-
+    totNos = 0
+    totNosCobertos = 0
+    totArestas = 0
+    totArestasCobertas = 0
     def __init__(self):
+        self.totNos = 0
+        self.totNosCobertos = 0
+        self.totArestas = 0
+        self.totArestasCobertas = 0
         pass
 
     def verificador(self, tipo):
@@ -74,7 +81,7 @@ class Grafo:
             self.transicaoDeCampo = False
             if self.campo == "orelse" and self.pilhaIf:
                 no.setPai(self.pilhaIf.pop())
-            if (self.campo == "fimOrelse" or self.campo ==  "fimOrelseFor" or self.campo ==  "fimOrelseWhile"):
+            if (self.campo == "fimOrelse" or self.campo ==  "fimOrelseFor"):
                 lista = []
                 for i in range(0,2):
                     self.pilhaCampo.pop()
@@ -84,9 +91,15 @@ class Grafo:
                 # esvazia a lista de nós sem filhos e coloca como pais do nó
                 while (len(self.listaSemFilhos) > 0):
                     o = self.listaSemFilhos.pop()
-                    if o.temFilho == True :
+                    if o.temFilho == True:
                         lista.append(o)
-                    no.setPai(lista)
+                    if no.getTipo() == "Except":
+                        for i in range(len(lista)):
+                            if lista[i].getSign() == True:
+                                no.setPai(lista[i])
+                        continue
+                    else:
+                        no.setPai(lista)
 
         else:
             no.setPai(self.anterior)
@@ -117,7 +130,6 @@ class Grafo:
                 self.pilhaFor.append(no)
             if (tipo == "While"):
                 self.pilhaWhile.append(no)
-
             self.anterior = no # nó recém incluido é anterior ao próximo
             return self.anterior
 
@@ -127,81 +139,131 @@ class Grafo:
             #print no.getTipo(), "numLinha: ", no.getNumLinha(), " filho de:"
             for pai in no.getPais():
                 try:
-                    print pai.getTipo()
+                    print (pai.getTipo())
                 except (AttributeError):  # se não tiver pais
-                    print "Ninguém"
+                    print ("Ninguém")
 
     def printCampo(self):
         print "Campo: ", self.campo
 
-    def geraDot(self, listCoverage, listSource):
+    def geraDot(self, listCoverage, listSource, sourceCode):
         dot = Digraph(comment='CFG')
-        #assigns = {'getNo': None, 'getTipo':'Assign', 'getLinha':''}
-        #assignsList = []
-        #lastAssign = None
+        for i in self.listaNos:
+            if i.getSign():
+                print('euuu ' +str(i.getTipo()))
         for no in self.listaNos:
+            if no.getPais() and no.getTipo() == "Except":
+                print('entrei')
+                for i in no.getPais():
+                    if i is not None and i.getSign() != True:
+                            no.getPais().remove(i)
 
-            '''if no.getTipo() =='Assign':
-                assigns['getLinha'] +=str(no.getNumLinha())+' '
-                assigns['getNo'] = no
-                assignsList.append(no)
-                continue
-            else:
-                if assigns['getNo'] != None:
-                    dot.node(str(assigns['getNo']), assigns['getTipo']+'\nL: '+assigns['getLinha'])
-                assigns['getNo'] = None
-                assigns['getLinha'] = ''
-                if assignsList:
-                    lastAssign = assignsList.pop()'''
-            if no.getNumLinha() in listCoverage:
-                dot.node(str(no), no.getTipoLinha(), color='green')
-            if listSource:
-                dot.node(str(no), no.getTipoLinha()+'\n'+listSource[no.getNumLinha() - 1])
-            else:
-                dot.node(str(no), no.getTipoLinha() + '\n')
-        for no in self.listaNos:
+        '''for no in self.listaNos:
+            pais = []
             if no.getPais():
+                for i in no.getPais():
+                    if i is not None and i.getSignInvalido() and no.getTipo()!= "For" and no.getTipo()!= "While" and no.getTipo()!= "Finally" and no.getTipo()!= "Except"  and (i.getNumLinha()<no.getNumLinha()):
+                        no.setSignInvalido(True)
+                        break'''
+        '''
+        for no in self.listaNos:
+            if no.getSignInvalido():
+                print('genji')'''
+
+        for no in self.listaNos:
+            if no.getNumLinha() in listCoverage and listSource:
+                if no.getTipo() == "Return" or no.getTipo() == "Break" or no.getTipo() == "Pass":
+                    dot.node(str(no), no.getTipoLinha()+'\n'+listSource[no.getNumLinha() - 1], color='green', style="bold")
+                    self.totNos +=1
+                    self.totNosCobertos += 1
+                    continue
+                else:
+                    dot.node(str(no), no.getTipoLinha()+'\n'+listSource[no.getNumLinha() - 1], color='green')
+                    self.totNos += 1
+                    self.totNosCobertos += 1
+                    continue
+            if listSource:
+                if no.getSignInvalido():
+                    dot.node(str(no), no.getTipoLinha()+'\n'+listSource[no.getNumLinha() - 1], color='red')
+                else:
+                    dot.node(str(no), no.getTipoLinha() + '\n' + listSource[no.getNumLinha() - 1])
+                self.totNos += 1
+            else:
+                if (no.getTipo() == "Return" or no.getTipo() == "Break" or no.getTipo() == "Pass") and no.getSignInvalido():
+                    dot.node(str(no), no.getTipoLinha() + '\n', style="bold", color="red")
+                    self.totNos += 1
+                    continue
+                if no.getTipo() == "Return" or no.getTipo() == "Break" or no.getTipo() == "Pass":
+                    dot.node(str(no), no.getTipoLinha() + '\n', style="bold")
+                    self.totNos += 1
+                    continue
+                if no.signInvalido():
+                    dot.node(str(no), no.getTipoLinha() + '\n', color="red", style="bold")
+                    self.totNos += 1
+                    continue
+                else:
+                    dot.node(str(no), no.getTipoLinha() + '\n')
+                    self.totNos += 1
+
+        for no in self.listaNos:
+            pais = []
+
+            if no.getPais():
+
+                '''for i in no.getPais():
+                    if i is not None and i.getSignInvalido() and (no.getTipo()!= "Finally" or no.getTipo()!= "Except"):
+                        no.setSignInvalido(True)
+                        print('oioioioioisssss')'''
+
+                '''for i in no.getPais():
+                    if (i is not None) and (i.getSign() != True) and (no.getTipo()== "Except"):
+                        no.getPais().remove(i)'''
+
                 pais = list(set(no.getPais()))
-                p = len(pais) - 1
-                filter(lambda p : hasattr(p, 'getTipo') and (p.getTipo() == "Continue" or p.getTipo() == "Return" or p.getTipo() == "Pass" or p.getTipo() == "Break") and no.getTipo() != "Finally", pais)
+                po = len(pais)-1
+                i = 0
 
-
-                p = len(pais) - 1
-                if no.getTipo() == "Except":
-                    for i in range(0, p):
-                        if pais[i].getSign() == 1:
+                while i <= po:
+                    if hasattr(pais[i], 'getTipo'):
+                        if (pais[i].getTipo() == "Break" or pais[i].getTipo() == "Pass" or pais[i].getTipo() == "Return") and no.getTipo() != "Finally" and not no.getSignInvalido():
                             pais.pop(i)
+                            po = len(pais)-1
+                            continue
+                    i+=1
+
                 for pai in pais:
                     if (pai is not None):
-                        if no.getNumLinha() in listCoverage and pai.getNumLinha() in listCoverage and no.getTipo() == "Except":
+                        if no.getNumLinha() in listCoverage and pai.getNumLinha() in listCoverage and no.getTipo() == "Except" and pai.getSign() == True:
                             dot.edge(str(pai), str(no), style='dashed', color='green')
+                            self.totArestasCobertas+=1
+                            self.totArestas+=1
                             continue
+
+
                         if no.getNumLinha() in listCoverage and pai.getNumLinha() in listCoverage:
                             dot.edge(str(pai), str(no), color='green')
+                            self.totArestasCobertas += 1
+                            self.totArestas += 1
                             continue
-                        if no.getTipo() == "Except" and no.getSign !=1:
+                        if no.getTipo() == "Except" and pai.getSign() == True:
                             dot.edge(str(pai), str(no), style ='dashed')
+                            self.totArestas += 1
+                            continue
+                        if no.getSignInvalido() or pai.getSignInvalido():
+                            dot.edge(str(pai), str(no), style='dotted', color = "red")
                             continue
 
                         else:
                             dot.edge(str(pai), str(no))
-        dot.render('grafo.gv', view=True)
-'''
-grafo = Grafo()
-grafo.criaNo("assignment", 0)
-grafo.criaNo("If", 0)
-grafo.defCampo("body")
-grafo.criaNo("assignment", 3)
-grafo.criaNo("assignment", 3)
-grafo.defCampo("orelse")
-grafo.criaNo("assignment", 3)
-grafo.criaNo("assignment", 3)
-grafo.defCampo("fimOrelse")
-grafo.criaNo("assignment", 3)
-grafo.criaNo("assignment", 3)
-grafo.criaNo("If", 5)
-print "printando grafo"
-grafo.printGrafo()
+                            self.totArestas += 1
 
-grafo.geraDot()
-'''
+        '''dot.node('nos: '+str(self.totNos))
+        dot.node('coberto: '+ str(self.totNosCobertos))
+        dot.node("arestas: \n"+str(self.totArestas))
+        dot.node("arestas cobertas : \n" + str(self.totArestasCobertas))'''
+        dot.node("Cobertura por nos: \n " + str(round((float(self.totNosCobertos) / float(self.totNos)), 3)),
+                 shape='box')
+        dot.node("Cobertura por arestas: \n " + str(round((float(self.totArestasCobertas) / float(self.totArestas)), 3)),
+                 shape='box')
+        dot.node("Source code: \n\t"+ sourceCode, shape='box'  )
+        dot.render('grafo.gv', view=True, )
