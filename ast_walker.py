@@ -57,7 +57,7 @@ class Ast_walker(ast.NodeVisitor):
                 for i in lastNode:
                     i.setSignInvalido(True)
             for i in lastNode:
-                if i.getTipo() in self.grafo.getTipos():
+                if i is not None and i.getTipo() in self.grafo.getTipos():
                     lastNode.remove(i)
         else:
             if caminhoInvalido:
@@ -127,10 +127,10 @@ class Ast_walker(ast.NodeVisitor):
             if caminhoInvalido:
                 lastNode.setSignInvalido(True)
             novoNos.append(lastNode)
-        self.grafo.defCampo("orelse")
-        caminhoInvalido = False
         if not node.orelse:
             novoNos.append(self.grafo.criaNo("orelseVazioIf", node.lineno))
+        self.grafo.defCampo("orelse")
+        caminhoInvalido = False
         if node.orelse:
             #orelse pode ter tamanho maior que 1?
             notTransicao = None

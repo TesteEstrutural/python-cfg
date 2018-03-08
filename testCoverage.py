@@ -1,31 +1,21 @@
 def oii(a):
-    try:
+    f = a
+    if a:
+        print('oi')
+        if f:
+            print('flws')
+        else:
+            print(222)
+        for i in a:
+            print(23)
+    print(1)
+    if f > 0:
+        f.read()
         for i in a:
             print(3)
-
-        with open('myfile.txt', 'r') as f:
-            print(33)
-            for i in a:
-                continue
-                print(3)
-                if f:
-                    f.read()
-                    if f:
-                        f.read()
-                    else:
-                        return 0
-                else:
-                    return 0
-                    raise
-                    if f:
-                        f.read()
-                    else:
-                        raise
-    except ValueError:
-        print ("x")
-    except IOError as e:
-        print ("y")
-    finally:
-        f = 9
+        else:
+            print('oi')
+    else:
+        raise
 if __name__ == '__main__':
 	print (oii(0))

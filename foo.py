@@ -18,34 +18,55 @@ def ow(r):
             return 0
 
 def oii(a):
-    try:
+    f = a
+    if a:
+        print('oi')
+        if f:
+            print('flws')
+        else:
+            print(222)
+        for i in a:
+            print(23)
+    print(1)
+    if f > 0:
+        f.read()
         for i in a:
             print(3)
-
-        with open('myfile.txt', 'r') as f:
-            print(33)
-            for i in a:
-                continue
-                print(3)
+        else:
+            print('oi')
+    else:
+        raise
+'''try:
+    for i in a:
+        print(3)
+    with open('myfile.txt', 'r') as f:
+        print(33)
+        for i in a:
+            continue
+            print(3)
+            if a:
+                f.read()
                 if f:
                     f.read()
-                    if f:
-                        f.read()
-                    else:
-                        return 0
                 else:
                     return 0
+            else:
+                return 0
+                raise
+                if f>0:
+                    f.read()
+                    for i in a:
+                        print(3)
+                else:
                     raise
-                    if f:
-                        f.read()
-                    else:
-                        raise
-    except ValueError:
-        print ("x")
-    except IOError as e:
-        print ("y")
-    finally:
-        f = 9
+except ValueError:
+    print ("x")
+except IOError as e:
+    print ("y")
+finally:
+    f = 9'''
+
+
 def puts(i):
     for j in i:
         for j in i:

@@ -20,7 +20,9 @@ class Grafo:
     pilhaIf = []
     pilhaFor = []
     pilhaWhile = []
-    pilhaCampo = []  # guarda campos para restaurar (if dentro de if, etc)
+    pilhaCampo = [[]]
+    fim = False
+      # guarda campos para restaurar (if dentro de if, etc)
     anterior = None
     campo = None  # define se está no body ou orelse de um if, por exemplo
     transicaoDeCampo = False
@@ -54,18 +56,43 @@ class Grafo:
         return True
 
     def defCampo(self, campo):  # define o contexto do próximo nó
-        if (campo == "orelse" and self.campo == "body" or
-           campo == "fimOrelse" and self.campo == "orelse"):
+        '''if (campo == "orelse" and self.campo == "body" or
+           campo == "fimOrelse" and self.campo == "orelse" or self.campo == "fimOrelse" and campo == "orelse" or self.campo == "fimOrelse" and campo == "orelse" or
+                        campo == "orelseFor" and self.campo == "bodyFor" or
+                        campo == "fimOrelseFor" and self.campo == "orelseFor" or self.campo == "fimOrelseFor" and campo == "orelseFor"):
             self.transicaoDeCampo = True
             if((self.anterior).temFilho == True):
                 self.listaSemFilhos.append(self.anterior)
+
         if (campo == "orelseFor" and self.campo == "bodyFor" or
-           campo == "fimOrelseFor" and self.campo == "orelseFor"):
+           campo == "fimOrelseFor" and self.campo == "orelseFor" or self.campo == "fimOrelseFor" and campo == "orelseFpr"):
             self.transicaoDeCampo = True
             if((self.anterior).temFilho == True):
-                self.listaSemFilhos.append(self.anterior)
+                self.listaSemFilhos.append(self.anterior)'''
+
         self.campo = campo  # pode ser body, orelse, fimOrelse, etc.
-        self.pilhaCampo.append(campo)
+        '''if self.pilhaCampo[-1] and len(self.pilhaCampo[-1]) > 2:
+            self.pilhaCampo.pop()
+            self.fim = True'''
+        print('vetorr ' + str(self.pilhaCampo))
+        if self.pilhaCampo[-1]:
+            eita = []
+            for i in self.pilhaCampo[-1]:
+                eita.append(i+'For')
+            if campo not in self.pilhaCampo[-1] and campo not in eita:
+                if (self.pilhaCampo[-1][0] == 'body' and campo =='orelse') or (self.pilhaCampo[-1][0] == 'bodyFor' and campo =='orelseFor'):
+                    self.transicaoDeCampo = True
+                    print('enrtererere')
+                self.pilhaCampo[-1].append(campo)
+            else:
+                self.pilhaCampo.append([campo])
+                self.listaSemFilhos.append(self.anterior)
+        else:
+            self.pilhaCampo.append([campo])
+        for i in range(len(self.pilhaCampo)):
+            if len(self.pilhaCampo[i]) == 3:
+                print('vetorr del' + str(self.pilhaCampo))
+                self.pilhaCampo.pop(i)
 
     def defPai(self, no):
         """
@@ -77,20 +104,30 @@ class Grafo:
 
         Caso contrário, define o pai como sendo o nó anterior.
         """
+
         if (self.transicaoDeCampo is True):
             self.transicaoDeCampo = False
-            if self.campo == "orelse" and self.pilhaIf:
+            print('entrei no if ' + str(self.pilhaCampo))
+            print('pilhaIf: '+str(self.pilhaIf))
+            print('pilhaFor: ' + str(self.pilhaFor))
+            if self.pilhaIf or self.pilhaFor:
+                print('entrei aqwu')
+                print('pilhaFor: ' + str(self.pilhaIf))
+
+
                 no.setPai(self.pilhaIf.pop())
-            if (self.campo == "fimOrelse" or self.campo ==  "fimOrelseFor"):
+
+                print('pilhaIf: ' + str(self.pilhaIf))
                 lista = []
-                for i in range(0,2):
-                    self.pilhaCampo.pop()
+                self.fim = False
+                print('vlws ' + str(self.pilhaCampo))
 
-                self.campo = self.pilhaCampo[-1]
-
+                print('vlws dps ' + str(self.pilhaCampo))
                 # esvazia a lista de nós sem filhos e coloca como pais do nó
+                print('list s filh'+str(self.listaSemFilhos))
                 while (len(self.listaSemFilhos) > 0):
                     o = self.listaSemFilhos.pop()
+                    print('mercy sucks')
                     if o.temFilho == True:
                         lista.append(o)
                     if no.getTipo() == "Except":
@@ -100,6 +137,14 @@ class Grafo:
                         continue
                     else:
                         no.setPai(lista)
+            '''if (self.campo == "fimOrelse" or self.campo ==  "fimOrelseFor"):
+                lista = []
+                for i in range(0,2):
+                    self.pilhaCampo.pop()
+'''
+
+                #self.campo = self.pilhaCampo[-1]
+            #if self.fim:#self.pilhaCampo[-2][-1] =='fimOrelse':
 
         else:
             no.setPai(self.anterior)
