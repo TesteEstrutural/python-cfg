@@ -111,23 +111,23 @@ class Grafo:
             print('pilhaIf: '+str(self.pilhaIf))
             print('pilhaFor: ' + str(self.pilhaFor))
             if self.pilhaIf or self.pilhaFor:
-                print('entrei aqwu')
-                print('pilhaFor: ' + str(self.pilhaIf))
-
-
-                no.setPai(self.pilhaIf.pop())
-
+                print('koeee'+str(self.pilhaCampo))
+                if self.pilhaCampo[-1] and self.pilhaCampo[-1][0] == "bodyFor":
+                    no.setPai(self.pilhaFor.pop())
+                    print('wakanda')
+                else:
+                    if self.pilhaIf:
+                        no.setPai(self.pilhaIf.pop())
+                    print('wack')
                 print('pilhaIf: ' + str(self.pilhaIf))
                 lista = []
                 self.fim = False
                 print('vlws ' + str(self.pilhaCampo))
-
                 print('vlws dps ' + str(self.pilhaCampo))
                 # esvazia a lista de nós sem filhos e coloca como pais do nó
                 print('list s filh'+str(self.listaSemFilhos))
                 while (len(self.listaSemFilhos) > 0):
                     o = self.listaSemFilhos.pop()
-                    print('mercy sucks')
                     if o.temFilho == True:
                         lista.append(o)
                     if no.getTipo() == "Except":
