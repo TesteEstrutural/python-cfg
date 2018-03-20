@@ -8,14 +8,9 @@ def oii(a):
             print(222)
         for i in a:
             print(23)
-    print(1)
-    if f > 0:
-        f.read()
-        for i in a:
-            print(3)
-        else:
-            print('oi')
+        for j in a:
+            print(23)
     else:
-        raise
+        print(3)
 if __name__ == '__main__':
 	print (oii(0))

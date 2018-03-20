@@ -74,24 +74,25 @@ class Grafo:
         '''if self.pilhaCampo[-1] and len(self.pilhaCampo[-1]) > 2:
             self.pilhaCampo.pop()
             self.fim = True'''
-        print('vetorr ' + str(self.pilhaCampo))
         if self.pilhaCampo[-1]:
             eita = []
-            for i in self.pilhaCampo[-1]:
-                eita.append(i+'For')
+            print(self.pilhaCampo)
+            if 'For' not in self.pilhaCampo[-1][0]:
+                for i in self.pilhaCampo[-1]:
+                    eita.append(i+'For')
+            print('eittt' + str(eita))
             if campo not in self.pilhaCampo[-1] and campo not in eita:
                 if (self.pilhaCampo[-1][0] == 'body' and campo =='orelse') or (self.pilhaCampo[-1][0] == 'bodyFor' and campo =='orelseFor'):
                     self.transicaoDeCampo = True
-                    print('enrtererere')
+                    self.listaSemFilhos.append(self.anterior)
                 self.pilhaCampo[-1].append(campo)
+
             else:
                 self.pilhaCampo.append([campo])
-                self.listaSemFilhos.append(self.anterior)
         else:
             self.pilhaCampo.append([campo])
         for i in range(len(self.pilhaCampo)):
             if len(self.pilhaCampo[i]) == 3:
-                print('vetorr del' + str(self.pilhaCampo))
                 self.pilhaCampo.pop(i)
 
     def defPai(self, no):
@@ -107,25 +108,20 @@ class Grafo:
 
         if (self.transicaoDeCampo is True):
             self.transicaoDeCampo = False
-            print('entrei no if ' + str(self.pilhaCampo))
-            print('pilhaIf: '+str(self.pilhaIf))
-            print('pilhaFor: ' + str(self.pilhaFor))
+            print('status lista campo: '+str(self.pilhaCampo))
             if self.pilhaIf or self.pilhaFor:
-                print('koeee'+str(self.pilhaCampo))
                 if self.pilhaCampo[-1] and self.pilhaCampo[-1][0] == "bodyFor":
                     no.setPai(self.pilhaFor.pop())
-                    print('wakanda')
                 else:
                     if self.pilhaIf:
                         no.setPai(self.pilhaIf.pop())
-                    print('wack')
-                print('pilhaIf: ' + str(self.pilhaIf))
                 lista = []
-                self.fim = False
-                print('vlws ' + str(self.pilhaCampo))
-                print('vlws dps ' + str(self.pilhaCampo))
                 # esvazia a lista de nós sem filhos e coloca como pais do nó
-                print('list s filh'+str(self.listaSemFilhos))
+                ui = []
+                if self.listaSemFilhos:
+                    for i in self.listaSemFilhos:
+                        ui.append(str(i.getTipo())+str(i.getNumLinha()))
+                print('lista sem filhos: '+str(self.listaSemFilhos)+" "+str(ui))
                 while (len(self.listaSemFilhos) > 0):
                     o = self.listaSemFilhos.pop()
                     if o.temFilho == True:
@@ -193,27 +189,11 @@ class Grafo:
 
     def geraDot(self, listCoverage, listSource, sourceCode):
         dot = Digraph(comment='CFG')
-        for i in self.listaNos:
-            if i.getSign():
-                print('euuu ' +str(i.getTipo()))
         for no in self.listaNos:
             if no.getPais() and no.getTipo() == "Except":
-                print('entrei')
                 for i in no.getPais():
                     if i is not None and i.getSign() != True:
                             no.getPais().remove(i)
-
-        '''for no in self.listaNos:
-            pais = []
-            if no.getPais():
-                for i in no.getPais():
-                    if i is not None and i.getSignInvalido() and no.getTipo()!= "For" and no.getTipo()!= "While" and no.getTipo()!= "Finally" and no.getTipo()!= "Except"  and (i.getNumLinha()<no.getNumLinha()):
-                        no.setSignInvalido(True)
-                        break'''
-        '''
-        for no in self.listaNos:
-            if no.getSignInvalido():
-                print('genji')'''
 
         for no in self.listaNos:
             if no.getNumLinha() in listCoverage and listSource:
