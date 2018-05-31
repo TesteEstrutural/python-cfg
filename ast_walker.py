@@ -57,7 +57,7 @@ class Ast_walker(ast.NodeVisitor):
                 for i in lastNode:
                     i.setSignInvalido(True)
             for i in lastNode:
-                if i is not None and i.getTipo() in self.grafo.getTipos():
+                if i.getTipo() in self.grafo.getTipos():
                     lastNode.remove(i)
         else:
             if caminhoInvalido:
@@ -127,10 +127,10 @@ class Ast_walker(ast.NodeVisitor):
             if caminhoInvalido:
                 lastNode.setSignInvalido(True)
             novoNos.append(lastNode)
-        if not node.orelse:
-            novoNos.append(self.grafo.criaNo("orelseVazioIf", node.lineno))
         self.grafo.defCampo("orelse")
         caminhoInvalido = False
+        if not node.orelse:
+            novoNos.append(self.grafo.criaNo("orelseVazioIf", node.lineno))
         if node.orelse:
             #orelse pode ter tamanho maior que 1?
             notTransicao = None
@@ -282,7 +282,6 @@ class Ast_walker(ast.NodeVisitor):
 
     def visit_TryExcept(self, node):
         '''
-
         '''
         handlerList = []
         novoNo = self.grafo.criaNo("TryExcept", node.lineno)
@@ -467,9 +466,11 @@ class Ast_walker(ast.NodeVisitor):
                             lastNode.setSignInvalido(True)
                 if type(lastNode) is list:
                     for n in range(len(lastNode)):
-                        if lastNode[n].getTipo() == "Continue":
-                            novoNo.setPai(lastNode[n])
-                            lastNode[n].setSignInvalido(True)
+                        if hasattr(lastNode[n], 'getTipo'):
+                            if lastNode[n].getTipo() != "If":
+                                novoNo.setPai(lastNode[n])
+                            if caminhoInvalido:
+                                lastNode[n].setSignInvalido(True)
                     continue
                 elif lastNode.getTipo() == "Continue":
                     novoNo.setPai(lastNode)
@@ -523,9 +524,8 @@ class Ast_walker(ast.NodeVisitor):
                 orelse suportado, sendo assim, o for atual caso tenha um else associado se torna pai do mesmo
                 elses executados apenas se não houver nenhum break no while'''
 
+
         novoNo = self.grafo.criaNo("While", node.lineno)
-        novoNo1 = None
-        iscontinue = False
         lastNode = None
         caminhoInvalido = False
         notTransicao = None
@@ -540,10 +540,11 @@ class Ast_walker(ast.NodeVisitor):
                     notTransicao = no
                     continue
                 else:
-                    if (type(no).__name__ == "Return" or type(no).__name__ == "Pass" or type(
-                            no).__name__ == "Continue" or type(no).__name__ == "Break") and (no is not node.body[-1]):
+                    if (type(no).__name__ == "Return" or type(no).__name__ == "Pass" or type(no).__name__ == "Continue" or type(no).__name__ == "Break") and (no is not node.body[-1]):
                         caminhoInvalido = True
-                        self.visit(no)
+                        lastNode = self.visit(no)
+                        if lastNode.getTipo() =="Continue":
+                            novoNo.setPai(lastNode)
                         continue
                     if notTransicao != None:
                         oi = self.visit(notTransicao)
@@ -560,41 +561,34 @@ class Ast_walker(ast.NodeVisitor):
                         elif (lastNode is not None):
                             lastNode.setSignInvalido(True)
                 if type(lastNode) is list:
-                    for n in lastNode:
-                        if n.getTipo() == "Continue":
-                            novoNo.setPai(n)
-                            n.setSignInvalido(True)
+                    for n in range(len(lastNode)):
+                        if hasattr(lastNode[n], 'getTipo'):
+                            if lastNode[n].getTipo() != "If":
+                                novoNo.setPai(lastNode[n])
+                            if caminhoInvalido:
+                                lastNode[n].setSignInvalido(True)
                     continue
-                if lastNode.getTipo() == "Continue":
+                elif lastNode.getTipo() == "Continue":
                     novoNo.setPai(lastNode)
+            lastNode = None
             if notTransicao != None:
                 notTransicao = self.visit(notTransicao)
                 lastNode = notTransicao
-        if type(lastNode) is list:
-            if caminhoInvalido:
-                for i in lastNode:
-                    i.setSignInvalido(True)
-            for i in lastNode:
-                if i.getTipo() in self.grafo.getTipos():
-                    lastNode.remove(i)
-            for n in lastNode:
-                novoNo.setPai(n)
+        if caminhoInvalido and lastNode is not None:
+            lastNode.setSignInvalido(True)
         else:
-            if caminhoInvalido:
-                lastNode.setSignInvalido(True)
-            else:
-                novoNo.setPai(lastNode)
+            novoNo.setPai(lastNode)
         self.grafo.defCampo("orelseFor")
         lastNode = None
         notTransicao = None
+        caminhoInvalido = False
         if node.orelse:
             for no in node.orelse:
                 if type(no).__name__ not in self.grafo.getTipos():
                     notTransicao = no
                     continue
                 else:
-                    if (type(no).__name__ == "Return" or type(no).__name__ == "Pass" or type(
-                            no).__name__ == "Continue" or type(no).__name__ == "Break") and (no is not node.orelse[-1]):
+                    if (type(no).__name__ == "Return" or type(no).__name__ == "Pass" or type(no).__name__ == "Continue" or type(no).__name__ == "Break") and (no is not node.orelse[-1]):
                         caminhoInvalido = True
                     if notTransicao != None:
                         self.visit(notTransicao)
@@ -629,7 +623,7 @@ class Ast_walker(ast.NodeVisitor):
         lastNode = None
         caminhoInvalido = False
         notTransicao = None
-        self.grafo.defCampo("bodyFor")
+        self.grafo.defCampo("body")
         if not node.body:
             lastNode = self.grafo.criaNo("bodyVazio", node.lineno)
         if node.body:
@@ -660,12 +654,10 @@ class Ast_walker(ast.NodeVisitor):
                             lastNode.setSignInvalido(True)
                 if type(lastNode) is list:
                     for n in lastNode:
-                        if n.getTipo() == "Continue":
-                            novoNo.setPai(n)
+                        if caminhoInvalido:
                             n.setSignInvalido(True)
                     continue
-                if lastNode.getTipo() == "Continue":
-                    novoNo.setPai(lastNode)
+
             if notTransicao != None:
                 notTransicao = self.visit(notTransicao)
                 lastNode = notTransicao
@@ -673,18 +665,11 @@ class Ast_walker(ast.NodeVisitor):
             if caminhoInvalido:
                 for i in lastNode:
                     i.setSignInvalido(True)
-            for i in lastNode:
-                if i.getTipo() in self.grafo.getTipos():
-                    lastNode.remove(i)
-            for n in lastNode:
-                novoNo.setPai(n)
         else:
             if caminhoInvalido:
                 lastNode.setSignInvalido(True)
-            else:
-                novoNo.setPai(lastNode)
-        self.grafo.defCampo("orelseFor")
-        self.grafo.defCampo("fimOrelseFor")
+        self.grafo.defCampo("orelse")
+        self.grafo.defCampo("fimOrelse")
         return novoNo
 
 
@@ -730,14 +715,5 @@ def runner(nomeFunc, mainString):
     # print (ast.dump(astOfSource))
     # print ast.dump(astOfSource1)
     # grafo.printGrafo()
-    grafo.geraDot([]#listCoverage[0]
+    grafo.geraDot(listCoverage[0]
       ,listCoverage[1], listCoverage[2])
-
-
-
-
-
-
-
-
-
