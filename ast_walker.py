@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 import ast
 import inspect
-from grafo import Grafo
-import coverage
+
 
 class Ast_walker(ast.NodeVisitor):
     def __init__(self, grafo):
@@ -18,7 +17,7 @@ class Ast_walker(ast.NodeVisitor):
         novoNo = self.grafo.criaNo(node.name, node.lineno)
         lastNode = None
         caminhoInvalido = None
-        print('eu')
+
         if node.body:
             notTransicao = None
             for no in node.body:
@@ -57,7 +56,7 @@ class Ast_walker(ast.NodeVisitor):
                 for i in lastNode:
                     i.setSignInvalido(True)
             for i in lastNode:
-                if i.getTipo() in self.grafo.getTipos():
+                if i is not None and i.getTipo() in self.grafo.getTipos():
                     lastNode.remove(i)
         else:
             if caminhoInvalido:
@@ -131,6 +130,7 @@ class Ast_walker(ast.NodeVisitor):
         caminhoInvalido = False
         if not node.orelse:
             novoNos.append(self.grafo.criaNo("orelseVazioIf", node.lineno))
+
         if node.orelse:
             #orelse pode ter tamanho maior que 1?
             notTransicao = None
@@ -159,7 +159,8 @@ class Ast_walker(ast.NodeVisitor):
                 notTransicao = self.visit(notTransicao)
                 novoNo2 = notTransicao
                 if caminhoInvalido:
-                    novoNo2.setSignInvalido(True)
+                    if novoNo2 is not None:
+                        novoNo2.setSignInvalido(True)
                 novoNos.append(novoNo2)
             elif novoNo2 is not None:
                 for i in novoNo2:
@@ -351,21 +352,18 @@ class Ast_walker(ast.NodeVisitor):
                 for k in novoNo1:
                     k.setSign(True)'''
         if node.handlers:
-            print("tam: "+ str(len(node.handlers)))
             for no in node.handlers:
                 handlerList.append(self.visit(no))
         flat_list = []
         for sublist in handlerList:
             for item in sublist:
                 flat_list.append(item)
-        print(flat_list)
+
         if type(lastNode) is list:
             if lastNode[0].getTipo() in self.grafo.getTipos():
                 lastNode.pop(0)
         for i in flat_list:
             if i.getTipo() == "Except":
-                print('oenrei')
-                print(lastNode)
                 if type(lastNode) is list:
                     #for k in range(len(lastNode)):
                      #   i.setPai(lastNode[k])
@@ -670,7 +668,7 @@ class Ast_walker(ast.NodeVisitor):
                 lastNode.setSignInvalido(True)
         self.grafo.defCampo("orelse")
         self.grafo.defCampo("fimOrelse")
-        return novoNo
+        return lastNode
 
 
     def generic_visit(self, node):
@@ -686,34 +684,4 @@ class Ast_walker(ast.NodeVisitor):
         ast.NodeVisitor.generic_visit(self, node)
         return novoNo
 
-def getCoverage(pythonFile, mainString):
-    import os
-    oi = inspect.getsource(pythonFile)
-    with open('testCoverage.py', 'w') as f:
-        f.write(oi)
-        f.write(mainString)
-    os.system('coverage annotate ' + 'testCoverage.py' + '')
-    os.system('coverage run ' + 'testCoverage.py' +'')
-    codeAnnotation = []
-    with open('testCoverage.py'+',cover','r') as f:
-        codeAnnotation = f.readlines()
-    codeAnnotation = [(x[1:].strip()).replace('\n', '') for x in codeAnnotation]
-    print(codeAnnotation)
-    dictResultFile = ast.literal_eval(str(open(".coverage", "r").read()).replace('!coverage.py: This is a private format, don\'t read it directly!', ''))
-    os.system('coverage erase ' + 'testCoverage.py' +'')
-    return [dictResultFile['lines'].values()[0], codeAnnotation, oi]
 
-
-def runner(nomeFunc, mainString):
-    grafo = Grafo()
-    walker = Ast_walker(grafo)
-    codeAst = ast.parse(inspect.getsource(nomeFunc))
-    listCoverage = getCoverage(nomeFunc, mainString)
-    # print inspect.getsource(shortBubbleSort)
-    walker.visit(codeAst)
-    # astOfSource1 = ast.parse(inspect.getsource(o))
-    # print (ast.dump(astOfSource))
-    # print ast.dump(astOfSource1)
-    # grafo.printGrafo()
-    grafo.geraDot(listCoverage[0]
-      ,listCoverage[1], listCoverage[2])
