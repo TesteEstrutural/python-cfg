@@ -1,8 +1,8 @@
-
 #primeiro arg sao os metodos que terao os grafos gerados e o segundo testes
 def hi():
     print('ooo')
     print(str(sys.argv))
+    print(len(sys.argv))
     try:
         if(len(sys.argv)==3):
             imp = importlib.import_module(str(sys.argv[1]))

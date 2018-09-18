@@ -1,6 +1,7 @@
 from ast_walker import *
 from runner import *
-
+import foo
+import unittest
 #[insertclass]
 
 funn = foo.shortBubbleSort
