@@ -7,11 +7,11 @@ from ast_walker import *
 from instrumentation import *
 import sys
 
-def runner(nomeFunc, mainString, testResult, fun_name):
+def runner(nomeFunc, mainString, testResult, fun_name,input):
     grafo = Grafo()
     walker = Ast_walker(grafo)
     codeAst = ast.parse(inspect.getsource(nomeFunc))
-    listCoverage = getCoverage(nomeFunc, mainString)
+    listCoverage = getCoverage(nomeFunc, mainString,input)
     print(inspect.getsource(nomeFunc))
     # print inspect.getsource(shortBubbleSort)
     walker.visit(codeAst)

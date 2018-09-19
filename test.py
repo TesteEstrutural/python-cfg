@@ -14,7 +14,7 @@ n_ele = []
 for i in elem:
     if callable(getattr(foo,i)):
         n_ele.append(getattr(foo,i))
-
+n_ele = [funn]
 inp = [5,6,7]
 exp_inp = [5,6]
 
@@ -31,5 +31,5 @@ if __name__ == '__main__':
    else:
        test_result = r.result.separator1 + "\n " + "OK, dados fornecidos passaram no teste" + " \n" + r.result.separator2 + "\n"
    for j in n_ele:
-        runner(j, "if __name__ == " + "'__main__'" + ":" + "\n\t" + "print (" + j.__name__ + '(' + str(inp) + '))', test_result, j.__name__)
+        runner(j, "if __name__ == " + "'__main__'" + ":" + "\n\t" + "print (" + j.__name__ + '(' + str(inp) + '))', test_result, j.__name__,inp)
    print(test_result)
