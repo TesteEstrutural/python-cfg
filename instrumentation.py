@@ -28,7 +28,7 @@ def getCoverage(pythonFile, mainString,fun_name, mod_name):
     with open(mod_name+'.py', 'r') as f:
         if not leu:
             l_1 = f.readline()
-        if l_1:
+        if l_1.strip()!=False:
             leu = True
     leu = False
     l_2 = ""
@@ -36,7 +36,7 @@ def getCoverage(pythonFile, mainString,fun_name, mod_name):
     with open('testCoverage.py', 'r') as f:
         if not leu:
             l_2 = f.readline()
-        if l_2:
+        if l_2.strip()!=False:
             leu = True
     print("oi "+l_1)
     print(l_2)
@@ -56,7 +56,13 @@ def getCoverage(pythonFile, mainString,fun_name, mod_name):
         codeAnnotation = [(x[1:].strip()).replace('\n', '') for x in codeAnnotation]
         #fixing line bug
         lines = []
-        lines = dictResultFile['lines'].values()[-1]
+        dicc = list(dictResultFile['lines'].keys())
+        print dicc
+        aux_name = ""
+        for i in dicc:
+            if mod_name in i:
+                aux_name = i
+        lines = dictResultFile['lines'][aux_name]
         if l_1!=l_2:
             aux_l = []
             for i in lines:
