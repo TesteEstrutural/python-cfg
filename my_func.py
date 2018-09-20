@@ -13,7 +13,7 @@ def shortBubbleSort(alist):
     return alist
 
 def func(a):
-    b = []
+    b = a
     try:
         with open(a, "w") as f:
             b = f.readline()
@@ -34,4 +34,3 @@ def func(a):
                     b[i + 1] = temp
             passnum = passnum - 1
         return b
-

@@ -4,7 +4,7 @@ def hi():
     print(str(sys.argv))
     print(len(sys.argv))
     try:
-        if(len(sys.argv)==3):
+        if(len(sys.argv)==4):
             imp = importlib.import_module(str(sys.argv[1]))
             print(imp)
             code = inspect.getsource(imp)
@@ -15,20 +15,12 @@ def hi():
             imp2 = importlib.import_module(str(sys.argv[2]))
             print(imp2)
             cod = inspect.getsource(imp2)
-            with open('test.py', "r") as f:
-                print("jjj")
-                newT = f.read().replace("#[insertclass]", cod)
-            with open('test.py', "w") as f:
-                f.write(newT)
             import os
-            os.system('python test.py')
+            os.system('coverage erase')
+            os.system('coverage run '+sys.argv[2]+'.py')
+            os.system('coverage annotate '+sys.argv[1]+'.py')
+            os.system('python test.py '+sys.argv[3]+' '+sys.argv[1])
 
-            with open('test.py', "r") as f:
-                newT = f.read().replace(cod,"#[insertclass]")
-            with open('test.py', "w") as f:
-                f.write(newT)
-            with open('foo.py', "w") as f:
-                f.write("")
     except:
         print "Wrong input or file not found"
 if __name__ == '__main__':
@@ -36,6 +28,6 @@ if __name__ == '__main__':
     import ast
     import inspect
     import importlib
-
     hi()
+
 #import test

@@ -1,0 +1,109 @@
+// CFG
+digraph {
+	<no.No object at 0x7fe57c4ec0d0> [label="func
+L: 1
+def func(a):" color=darkgreen]
+	<no.No object at 0x7fe57c4ec110> [label="TryExcept
+L: 3
+try:" color=darkgreen]
+	<no.No object at 0x7fe57c4ec190> [label="With
+L: 4
+with open(a, \"w\") as f:" color=darkgreen]
+	<no.No object at 0x7fe57c4ec1d0> [label="Assign
+L: 5
+b = f.readline()" color=darkgreen]
+	<no.No object at 0x7fe57c4ec210> [label="Except
+L: 6
+except FileNotFoundError:" color=darkgreen]
+	<no.No object at 0x7fe57c4ec250> [label="Print
+L: 7
+print(\"File not found or could not be loaded\")" color=darkgreen]
+	<no.No object at 0x7fe57c4ec2d0> [label="Except
+L: 8
+except:" color=darkgreen]
+	<no.No object at 0x7fe57c4ec350> [label="Print
+L: 9
+print(\"File not found or could not be loaded\")" color=darkgreen]
+	<no.No object at 0x7fe57c4ec290> [label="Finally
+L: 3
+try:" color=darkgreen]
+	<no.No object at 0x7fe57c4ec390> [label="Assign
+L: 12
+passnum = len(b) - 1" color=darkgreen]
+	<no.No object at 0x7fe57c4ec3d0> [label="While
+L: 13
+while passnum > 0 and exchanges:" color=red]
+	<no.No object at 0x7fe57c4ec410> [label="Assign
+L: 14
+exchanges = False" color=darkgreen]
+	<no.No object at 0x7fe57c4ec450> [label="For
+L: 15
+for i in range(passnum):"]
+	<no.No object at 0x7fe57c4debd0> [label="If
+L: 16
+if b[i] > b[i + 1]:"]
+	<no.No object at 0x7fe57c4dec10> [label="Assign
+L: 20
+b[i + 1] = temp"]
+	<no.No object at 0x7fe57c4dec50> [label="orelseVazioIf
+L: 16
+if b[i] > b[i + 1]:"]
+	<no.No object at 0x7fe57c4ec310> [label="Assign
+L: 21
+passnum = passnum - 1"]
+	<no.No object at 0x7fe57c4deb90> [label="Return
+L: 22
+return b"]
+	<no.No object at 0x7fe57c4ec0d0> -> <no.No object at 0x7fe57c4ec110> [color=darkgreen]
+	<no.No object at 0x7fe57c4ec110> -> <no.No object at 0x7fe57c4ec190> [color=darkgreen]
+	<no.No object at 0x7fe57c4ec190> -> <no.No object at 0x7fe57c4ec1d0> [color=darkgreen]
+	<no.No object at 0x7fe57c4ec1d0> -> <no.No object at 0x7fe57c4ec210> [color=darkgreen style=dashed]
+	<no.No object at 0x7fe57c4ec210> -> <no.No object at 0x7fe57c4ec250> [color=darkgreen]
+	<no.No object at 0x7fe57c4ec1d0> -> <no.No object at 0x7fe57c4ec2d0> [color=darkgreen style=dashed]
+	<no.No object at 0x7fe57c4ec2d0> -> <no.No object at 0x7fe57c4ec350> [color=darkgreen]
+	<no.No object at 0x7fe57c4ec350> -> <no.No object at 0x7fe57c4ec290> [color=darkgreen]
+	<no.No object at 0x7fe57c4ec250> -> <no.No object at 0x7fe57c4ec290> [color=darkgreen]
+	<no.No object at 0x7fe57c4ec290> -> <no.No object at 0x7fe57c4ec390> [color=darkgreen]
+	<no.No object at 0x7fe57c4ec390> -> <no.No object at 0x7fe57c4ec3d0> [color=red style=dotted]
+	<no.No object at 0x7fe57c4ec310> -> <no.No object at 0x7fe57c4ec3d0> [color=red style=dotted]
+	<no.No object at 0x7fe57c4ec3d0> -> <no.No object at 0x7fe57c4ec410> [color=red style=dotted]
+	<no.No object at 0x7fe57c4ec410> -> <no.No object at 0x7fe57c4ec450>
+	<no.No object at 0x7fe57c4dec50> -> <no.No object at 0x7fe57c4ec450>
+	<no.No object at 0x7fe57c4dec10> -> <no.No object at 0x7fe57c4ec450>
+	<no.No object at 0x7fe57c4ec450> -> <no.No object at 0x7fe57c4debd0>
+	<no.No object at 0x7fe57c4debd0> -> <no.No object at 0x7fe57c4dec10>
+	<no.No object at 0x7fe57c4debd0> -> <no.No object at 0x7fe57c4dec50>
+	<no.No object at 0x7fe57c4dec10> -> <no.No object at 0x7fe57c4ec310>
+	<no.No object at 0x7fe57c4dec50> -> <no.No object at 0x7fe57c4ec310>
+	<no.No object at 0x7fe57c4ec310> -> <no.No object at 0x7fe57c4deb90>
+	"Cobertura por nos: 
+ 0.611" [shape=box]
+	"Cobertura por arestas: 
+ 0.526" [shape=box]
+	"Source code: 
+	def func(a):
+    b = a
+    try:
+        with open(a, \"w\") as f:
+            b = f.readline()
+    except FileNotFoundError:
+        print(\"File not found or could not be loaded\")
+    except:
+        print(\"File not found or could not be loaded\")
+    finally:
+        exchanges = True
+        passnum = len(b) - 1
+        while passnum > 0 and exchanges:
+            exchanges = False
+            for i in range(passnum):
+                if b[i] > b[i + 1]:
+                    exchanges = True
+                    temp = b[i]
+                    b[i] = b[i + 1]
+                    b[i + 1] = temp
+            passnum = passnum - 1
+        return b
+" [shape=box]
+	"Test results:
+	 " [shape=box]
+}
